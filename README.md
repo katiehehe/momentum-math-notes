@@ -1,22 +1,22 @@
-# Why Momentum Works — Math Notes
+# Geometry Before Stepsize
 
-Clickable KaTeX notes walking through [Why Momentum Really Works](https://distill.pub/2017/momentum/) (Distill), with derivations.
+Pretraining-optimization brainlift for Incept’s eduLLM (κ-first pretraining), with Distill math notes as an appendix.
 
 ## Live site
 
 **https://katiehehe.github.io/momentum-math-notes/**
 
-- Math notes (Distill walkthrough): `/`
-- Brainlift thesis: [`/brainlift.html`](https://katiehehe.github.io/momentum-math-notes/brainlift.html)
+| Page | URL |
+|------|-----|
+| Brainlift (main) | https://katiehehe.github.io/momentum-math-notes/ |
+| Distill math notes (appendix) | https://katiehehe.github.io/momentum-math-notes/notes.html |
 
 Repo: https://github.com/katiehehe/momentum-math-notes
 
 ## Local preview
 
-Open `index.html` in a browser, or from this folder:
-
 ```bash
 python3 -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`.
+Then open `http://localhost:8000`.

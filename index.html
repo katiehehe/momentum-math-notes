@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Why Momentum Works — Math Notes (Distill)</title>
+  <title>Geometry Before Stepsize — Pretraining Optimization Brainlift</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -15,1805 +15,367 @@
     });"></script>
   <style>
     :root {
-      --bg: #f7f4ef;
-      --ink: #1c1917;
-      --muted: #57534e;
-      --card: #fffdf9;
-      --line: #e7e0d5;
-      --accent: #0f766e;
-      --accent-soft: #ccfbf1;
-      --chip: #f0ebe3;
+      --bg: #f4f1ea;
+      --ink: #1a1814;
+      --muted: #5c574e;
+      --line: #ddd4c4;
+      --accent: #0f5c56;
+      --card: #fffcf7;
+      --pull: #0f5c56;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      font-family: "Source Serif 4", "Iowan Old Style", Palatino, Georgia, serif;
       background:
-        radial-gradient(1200px 600px at 10% -10%, #ddf3ef 0%, transparent 50%),
-        radial-gradient(900px 500px at 100% 0%, #f3e8d8 0%, transparent 45%),
+        linear-gradient(180deg, #e8f2f0 0%, transparent 28%),
         var(--bg);
       color: var(--ink);
-      line-height: 1.55;
+      line-height: 1.65;
+      font-size: 1.05rem;
     }
-    main {
-      max-width: 760px;
+    article {
+      max-width: 720px;
       margin: 0 auto;
-      padding: 2.5rem 1.25rem 4rem;
+      padding: 3rem 1.35rem 5rem;
     }
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0 0 0.4rem;
-    }
-    h2 {
+    .label {
       font-family: ui-sans-serif, system-ui, sans-serif;
       font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--accent);
-      margin: 2rem 0 0.65rem;
+      margin: 0 0 0.75rem;
     }
-    .sub {
+    h1 {
+      font-size: clamp(1.85rem, 4vw, 2.35rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.5rem;
+      font-weight: 700;
+    }
+    .subtitle {
+      font-size: 1.15rem;
       color: var(--muted);
-      margin: 0 0 1.25rem;
-      font-size: 0.98rem;
+      margin: 0 0 1rem;
     }
-    .tip {
+    .meta {
       font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--muted);
-      background: #fff;
-      border: 1px dashed var(--line);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      margin-bottom: 1.25rem;
+      margin: 0 0 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
     }
-    .toc {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 1.5rem;
-    }
-    .toc a {
+    .meta a { color: var(--accent); }
+    h2 {
       font-family: ui-sans-serif, system-ui, sans-serif;
       font-size: 0.78rem;
-      text-decoration: none;
-      color: var(--ink);
-      background: var(--chip);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 0.3rem 0.7rem;
-    }
-    .toc a:hover { background: var(--accent-soft); border-color: #99f6e4; }
-    details {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      margin: 0.65rem 0;
-      overflow: visible;
-    }
-    details[open] {
-      box-shadow: 0 8px 28px rgba(28, 25, 23, 0.06);
-    }
-    summary {
-      cursor: pointer;
-      list-style: none;
-      padding: 1rem 1.1rem;
-      font-weight: 650;
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      user-select: none;
-    }
-    summary::-webkit-details-marker { display: none; }
-    summary::before {
-      content: "▸";
-      color: var(--accent);
-      font-size: 0.9rem;
-      transition: transform 0.15s ease;
-    }
-    details[open] summary::before { transform: rotate(90deg); }
-    summary:hover { background: #faf6f0; }
-    .body {
-      padding: 0 1.15rem 1.15rem;
-      border-top: 1px solid var(--line);
-    }
-    .body p { margin: 0.9rem 0 0.5rem; }
-    .body ul { margin: 0.4rem 0 0.6rem 1.2rem; padding: 0; }
-    .body li { margin: 0.25rem 0; }
-    .katex-display {
-      margin: 1rem 0;
-      overflow: visible;
-      font-size: 1.05em;
-    }
-    .katex-display > .katex {
-      white-space: normal;
-      /* allow long displays to wrap instead of a horizontal scroll gutter */
-    }
-    .katex-display .base {
-      margin: 0.15em 0;
-    }
-    @media (max-width: 640px) {
-      .katex-display { font-size: 0.92em; }
-    }
-    .tag {
-      display: inline-block;
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--accent);
-      background: var(--accent-soft);
-      padding: 0.15rem 0.45rem;
-      border-radius: 999px;
-      margin-left: auto;
-      flex-shrink: 0;
+      margin: 2.75rem 0 0.9rem;
     }
-    .callout {
-      background: #f0fdfa;
-      border-left: 3px solid var(--accent);
-      padding: 0.7rem 0.9rem;
-      margin: 0.85rem 0 0.4rem;
-      border-radius: 0 8px 8px 0;
-      font-size: 0.95rem;
+    h3 {
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.5rem;
+      font-weight: 650;
     }
+    p { margin: 0.85rem 0; }
+    ul, ol { margin: 0.5rem 0 0.85rem 1.2rem; padding: 0; }
+    li { margin: 0.35rem 0; }
+    .pull {
+      margin: 2rem 0;
+      padding: 1.25rem 1.4rem;
+      border-left: 4px solid var(--pull);
+      background: var(--card);
+      font-size: 1.25rem;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 1rem 0 1.25rem;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
+    th, td {
+      border-top: 1px solid var(--line);
+      padding: 0.55rem 0.4rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .katex-display {
+      margin: 1.1rem 0;
+      overflow: visible;
+      font-size: 1.02em;
+    }
+    .katex-display > .katex { white-space: normal; }
+    blockquote.claim {
+      margin: 1.1rem 0;
+      padding: 0.9rem 1.1rem;
+      background: #eef7f5;
+      border-radius: 8px;
+      border: 1px solid #c5e4de;
+      font-style: normal;
+    }
+    .spov {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem 1.15rem;
+      margin: 1rem 0;
+    }
+    .spov strong.claim-line {
+      display: block;
+      margin-bottom: 0.45rem;
+    }
+    .refs {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+    .refs li { margin: 0.45rem 0; }
+    .refs a { color: var(--accent); }
+    .nav {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .nav a { color: var(--accent); }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Why Momentum Works — clickable math notes</h1>
-    <p class="sub">From Distill + our derivations. Click a section to expand rendered KaTeX.</p>
-    <p class="tip">Live: <a href="https://katiehehe.github.io/momentum-math-notes/">math notes</a> · Brainlift: <a href="brainlift.html">Geometry Before Stepsize</a>.</p>
-
-    <nav class="toc" aria-label="Jump to section">
-      <a href="#gd">GD + eigenbasis</a>
-      <a href="#regression">Regression view</a>
-      <a href="#tikhonov">Tikhonov / ridge</a>
-      <a href="#early">Early stopping</a>
-      <a href="#momentum">Momentum stability</a>
-      <a href="#phase">Phase portraits</a>
-      <a href="#optimal">Optimal α,β</a>
-      <a href="#fourier">Fourier / colorization</a>
-      <a href="#firstorder">First-order class</a>
-    </nav>
-
-    <!-- ========== PART 1 ========== -->
-    <h2 id="gd">Part 1 — Gradient descent on a convex quadratic</h2>
-
-    <details>
-      <summary>Toy loss and optimum <span class="tag">setup</span></summary>
-      <div class="body">
-        <p>Convex quadratic:</p>
-        $$
-        f(w)=\frac12 w^\top A w-b^\top w,\qquad w\in\mathbb{R}^n
-        $$
-        <p>If $A$ is symmetric and invertible:</p>
-        $$
-        \nabla f(w)=Aw-b,\qquad Aw^\star=b\qquad\Rightarrow\qquad w^\star=A^{-1}b
-        $$
-        <p>$A$ plays the role of curvature (Hessian). <strong>Pathological conditioning / curvature</strong> = $A$ stretched unevenly: $\kappa=\lambda_{\max}/\lambda_{\min}\gg 1$ (long ravine). One step size can’t fit sharp and flat directions; GD crawls on the flat ones.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>GD step and error update <span class="tag">GD</span></summary>
-      <div class="body">
-        $$
-        w_{k+1}=w_k-\alpha(Aw_k-b)
-        $$
-        $$
-        e_k=w_k-w^\star,\qquad e_{k+1}=(I-\alpha A)e_k
-        $$
-      </div>
-    </details>
-
-    <details>
-      <summary>Eigenbasis: $x=Q^\top e$ <span class="tag">LA</span></summary>
-      <div class="body">
-        $$
-        A=Q\,\mathrm{diag}(\lambda_1,\ldots,\lambda_n)\,Q^\top,
-        \qquad
-        Aq_i=\lambda_i q_i,
-        \qquad
-        \lambda_1\le\cdots\le\lambda_n
-        $$
-        $$
-        x_k=Q^\top(w_k-w^\star),\qquad x_i=q_i\cdot(w-w^\star)
-        $$
-        <p class="callout">$Q^\top$ reads off alignment with each eigendirection. New axes = the $q_i$’s. Same problem, clearer coordinates.</p>
-        <p>Condition number $\kappa=\lambda_{\max}/\lambda_{\min}$ measures how stretched the bowl is (pathological curvature for GD).</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Why updates break apart <span class="tag">key</span></summary>
-      <div class="body">
-        $$
-        x_{k+1}=(I-\alpha\Lambda)x_k
-        $$
-        $$
-        x_{k+1}=
-        \begin{bmatrix}
-        1-\alpha\lambda_1 & 0 & 0 \\
-        0 & 1-\alpha\lambda_2 & 0 \\
-        0 & 0 & 1-\alpha\lambda_3
-        \end{bmatrix}
-        \begin{bmatrix}
-        x_1^k \\ x_2^k \\ x_3^k
-        \end{bmatrix}
-        $$
-        $$
-        x_i^{k+1}=(1-\alpha\lambda_i)\,x_i^k
-        \qquad\Rightarrow\qquad
-        x_i^k=(1-\alpha\lambda_i)^k\,x_i^0
-        $$
-        <p>Each coordinate’s update depends only on itself — decoupled, not “independent of coordinates.”</p>
-        $$
-        w_k-w^\star=\sum_{i=1}^n x_i^0\,(1-\alpha\lambda_i)^k\,q_i
-        $$
-      </div>
-    </details>
-
-    <details>
-      <summary>Excess loss identity + eigenspace split <span class="tag">derive</span></summary>
-      <div class="body">
-        <p><strong>Excess loss</strong> = optimality gap $f(w)-f(w^\star)$, not a dataset metric.</p>
-        $$
-        f(w)-f(w^\star)=\frac12(w-w^\star)^\top A(w-w^\star)
-        $$
-        <p>Why the last step works: expand and use $A=A^\top$ so $w^\top Aw^\star=(w^\star)^\top Aw$:</p>
-        $$
-        \begin{aligned}
-        \frac12(w-w^\star)^\top A(w-w^\star)
-        &=
-        \frac12\Bigl(
-        w^\top Aw-w^\top Aw^\star-(w^\star)^\top Aw+(w^\star)^\top Aw^\star
-        \Bigr)\\
-        &=
-        \frac12 w^\top Aw-w^\top Aw^\star+\frac12(w^\star)^\top Aw^\star.
-        \end{aligned}
-        $$
-        <p>In eigen-coordinates:</p>
-        $$
-        f(w_k)-f(w^\star)
-        =
-        \frac12\sum_{i=1}^n
-        (1-\alpha\lambda_i)^{2k}\,
-        \lambda_i\,
-        (x_i^0)^2
-        $$
-        <p>Each summand = one eigen-direction’s contribution (Distill’s stacked pink bars). Components never hit exact 0 in finite time — just become negligible.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 2 ========== -->
-    <h2 id="regression">Part 2 — Regression, eigenfeatures, rotations</h2>
-
-    <details>
-      <summary>Same model, new axes: $Zw=(ZQ)x$ <span class="tag">key</span></summary>
-      <div class="body">
-        <p>Least squares uses curvature $A\sim Z^\top Z$. Eigenvectors of $Z^\top Z$ define the special axes.</p>
-        <p>Change of variables $w=Qx$ (so $x=Q^\top w$):</p>
-        $$
-        Zw = Z(Qx)=(ZQ)x
-        $$
-        <ul>
-          <li>new weights: $x=Q^\top w$</li>
-          <li>new design matrix / eigenfeatures on data: $ZQ$, whose $i$-th column is $Zq_i$</li>
-          <li>predictions unchanged</li>
-        </ul>
-        <p class="callout">Distill saying “rotate $w$ into $Qw$” is loose. Prefer $x=Q^\top w$ into the eigenbasis and $w=Qx$ back out.</p>
-        <p>You rotate the <em>coordinate system</em> (both weights and features in matching ways), not the underlying regression problem.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Why coordinates become independent <span class="tag">why</span></summary>
-      <div class="body">
-        <p>Excess loss $\propto (w-w^\star)^\top A(w-w^\star)$. If $A$ has off-diagonals, $w_1$ and $w_2$ couple.</p>
-        <p>With $w-w^\star=Qx$ and $A=Q\Lambda Q^\top$:</p>
-        $$
-        (w-w^\star)^\top A(w-w^\star)=x^\top\Lambda x=\sum_i\lambda_i x_i^2
-        $$
-        <p>No cross terms $\Rightarrow$ $n$ separate 1D problems. Same bowl; axes aligned with the oval.</p>
-        <p>$w_i$ motion mixes every direction; $x_i$ motion is one pure rate $(1-\alpha\lambda_i)$ — more understandable.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Eigenfeatures, robustness, large vs small $\lambda$ <span class="tag">stats</span></summary>
-      <div class="body">
-        <p>Model as sum of rows $x_i\,\bar p_i$. Contribution on the dataset:</p>
-        $$
-        x_i\,(Zq_i)
-        $$
-        <p>$q_i$ lives in weight space; $Zq_i$ is that direction mapped to data space (the plotted curve). Direction not lost — evaluated.</p>
-        <p>Ordered by eigenvalue (usually large $\to$ small):</p>
-        <ul>
-          <li><strong>Large $\lambda$</strong>: high curvature, GD learns faster, <em>robust</em> to noise in targets $d_i$, coarse structure (e.g. between-cluster)</li>
-          <li><strong>Small $\lambda$</strong>: flat, slow, <em>sensitive</em> to tiny perturbations in $d_i$, jagged / noise-fitting</li>
-        </ul>
-        <p>“Sort by sensitivity to perturbations in $d_i$” = order from “needs real signal to move” $\to$ “twitches when data twitches.”</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 3 ========== -->
-    <h2 id="tikhonov">Part 3 — Tikhonov (ridge) as a spectral filter</h2>
-
-    <details open>
-      <summary>Step A — Expand the Tikhonov objective <span class="tag">derive</span></summary>
-      <div class="body">
-        <p>Start from ridge / Tikhonov:</p>
-        $$
-        J(w)=\frac12\|Zw-d\|^2+\frac\eta2\|w\|^2
-        $$
-        Expand the square ($\|v\|^2=v^\top v$):
-        $$
-        \begin{aligned}
-        \frac12\|Zw-d\|^2
-        &=
-        \frac12(Zw-d)^\top(Zw-d)\\
-        &=
-        \frac12\bigl(w^\top Z^\top Zw-2d^\top Zw+d^\top d\bigr)\\
-        &=
-        \frac12 w^\top(Z^\top Z)w-(Z^\top d)^\top w+\text{const}.
-        \end{aligned}
-        $$
-        Add the penalty $\frac\eta2 w^\top w=\frac\eta2 w^\top I w$:
-        $$
-        J(w)=\frac12 w^\top(Z^\top Z+\eta I)w-(Z^\top d)^\top w+\text{const}.
-        $$
-        <p class="callout">Distill writes the linear term as $(Zd)^\top w$; they mean $(Z^\top d)^\top w$.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Step B — Critical point $\Rightarrow$ closed form <span class="tag">derive</span></summary>
-      <div class="body">
-        <p>Differentiate the quadratic $J$ (gradient of $\tfrac12 w^\top A w-c^\top w$ is $Aw-c$):</p>
-        $$
-        \nabla J(w)=(Z^\top Z+\eta I)w-Z^\top d.
-        $$
-        Set $\nabla J=0$:
-        $$
-        (Z^\top Z+\eta I)w=Z^\top d
-        \qquad\Rightarrow\qquad
-        w^\star_{\eta}=(Z^\top Z+\eta I)^{-1}(Z^\top d).
-        $$
-        <p>Compared to ordinary least squares ($\eta=0$): $w=(Z^\top Z)^{-1}Z^\top d$ when invertible. Ridge adds $\eta I$ so the solve always exists for $\eta&gt;0$.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Step C — Diagonalize: why $1/(\lambda_i+\eta)$ <span class="tag">key</span></summary>
-      <div class="body">
-        <p>Eigen-decompose the Gram matrix:</p>
-        $$
-        Z^\top Z=Q\Lambda Q^\top,
-        \qquad
-        \Lambda=\mathrm{diag}(\lambda_1,\ldots,\lambda_n),
-        \qquad
-        Q^\top Q=I.
-        $$
-        Then
-        $$
-        Z^\top Z+\eta I=Q\Lambda Q^\top+\eta QIQ^\top=Q(\Lambda+\eta I)Q^\top.
-        $$
-        Invert (orthogonal $Q$):
-        $$
-        (Z^\top Z+\eta I)^{-1}=Q(\Lambda+\eta I)^{-1}Q^\top
-        =Q\,\mathrm{diag}\!\left(\frac1{\lambda_1+\eta},\ldots,\frac1{\lambda_n+\eta}\right)Q^\top.
-        $$
-        Therefore Distill’s formula:
-        $$
-        w^\star_{\eta}
-        =
-        Q\,\mathrm{diag}\!\left(\frac1{\lambda_1+\eta},\ldots,\frac1{\lambda_n+\eta}\right)Q^\top(Z^\top d).
-        $$
-        <p>In eigen-coordinates $x=Q^\top w$, each coordinate gets multiplied by $1/(\lambda_i+\eta)$ against the data projection $(Q^\top Z^\top d)_i$.</p>
-        <ul>
-          <li>large $\lambda_i$: $1/(\lambda_i+\eta)\approx 1/\lambda_i$ — almost OLS</li>
-          <li>small $\lambda_i$: $1/(\lambda_i+\eta)\approx 1/\eta$ — capped; noisy directions suppressed</li>
-        </ul>
-      </div>
-    </details>
-
-    <details>
-      <summary>Step D — Algebra of Distill’s Tikhonov identity <span class="tag">algebra</span></summary>
-      <div class="body">
-        <p>They rewrite the filter as:</p>
-        $$
-        \frac{1}{\lambda_i+\eta}
-        =
-        \frac{1}{\lambda_i}\Bigl(1-(1+\lambda_i/\eta)^{-1}\Bigr).
-        $$
-        <p>Check: right-hand side</p>
-        $$
-        \begin{aligned}
-        \frac1{\lambda_i}\left(1-\frac{1}{1+\lambda_i/\eta}\right)
-        &=
-        \frac1{\lambda_i}\left(1-\frac{\eta}{\eta+\lambda_i}\right)
-        =
-        \frac1{\lambda_i}\cdot\frac{\lambda_i}{\eta+\lambda_i}
-        =
-        \frac{1}{\lambda_i+\eta}.
-        \end{aligned}
-        $$
-        <p>So it’s the same number, written to look like “OLS factor $1/\lambda_i$ times a shrinkage $(1-\cdots)$.”</p>
-        <p>Equivalently, ridge multiplies the unregularized spectral coefficient by</p>
-        $$
-        \frac{\lambda_i}{\lambda_i+\eta}\in(0,1).
-        $$
-      </div>
-    </details>
-
-    <details open>
-      <summary>Step E — Derive the GD spectral filter <span class="tag">key</span></summary>
-      <div class="body">
-        <p>Unregularized least squares gradient: $\nabla\bigl(\tfrac12\|Zw-d\|^2\bigr)=Z^\top Zw-Z^\top d$. GD:</p>
-        $$
-        w_{k+1}=w_k-\alpha(Z^\top Zw_k-Z^\top d).
-        $$
-        Work in eigenbasis. Let $c=Q^\top Z^\top d$ (fixed data projection), $x_k=Q^\top w_k$, and use $Z^\top Z=Q\Lambda Q^\top$:
-        $$
-        x_{k+1}=x_k-\alpha(\Lambda x_k-c)=(I-\alpha\Lambda)x_k+\alpha c.
-        $$
-        Componentwise (1D affine recurrence):
-        $$
-        x_i^{k+1}=(1-\alpha\lambda_i)\,x_i^k+\alpha\,c_i.
-        $$
-        <p>Start at $w_0=0\Rightarrow x_i^0=0$. Unroll:</p>
-        $$
-        \begin{aligned}
-        x_i^1&=\alpha c_i\\
-        x_i^2&=(1-\alpha\lambda_i)\alpha c_i+\alpha c_i\\
-        &\vdots\\
-        x_i^k
-        &=
-        \alpha c_i\sum_{j=0}^{k-1}(1-\alpha\lambda_i)^j.
-        \end{aligned}
-        $$
-        Geometric sum $\sum_{j=0}^{k-1}r^j=(1-r^k)/(1-r)$ with $r=1-\alpha\lambda_i$:
-        $$
-        x_i^k
-        =
-        \alpha c_i\cdot\frac{1-(1-\alpha\lambda_i)^k}{\alpha\lambda_i}
-        =
-        \frac{c_i}{\lambda_i}\Bigl(1-(1-\alpha\lambda_i)^k\Bigr).
-        $$
-        <p>OLS / infinite GD would give $x_i^\infty=c_i/\lambda_i$ (when $\lambda_i&gt;0$). So after $k$ steps the <strong>effective filter</strong> multiplying $c_i$ is Distill’s</p>
-        $$
-        \frac{1}{\lambda_i}\Bigl(1-(1-\alpha\lambda_i)^k\Bigr)
-        $$
-        instead of the full $1/\lambda_i$.
-        <p class="callout">Needs $|1-\alpha\lambda_i|&lt;1$ for that mode to converge (in particular $\alpha&lt;2/\lambda_{\max}$).</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Step F — Side-by-side: same job, different knobs <span class="tag">compare</span></summary>
-      <div class="body">
-        <p>Both replace the unregularized spectral weight $1/\lambda_i$ by a smaller factor:</p>
-        $$
-        \begin{aligned}
-        \textbf{Tikhonov:}&\quad
-        \frac{1}{\lambda_i+\eta}
-        =
-        \frac{1}{\lambda_i}\Bigl(1-(1+\lambda_i/\eta)^{-1}\Bigr)\\[0.75em]
-        \textbf{GD ($k$ steps):}&\quad
-        \frac{1}{\lambda_i}\Bigl(1-(1-\alpha\lambda_i)^k\Bigr).
-        \end{aligned}
-        $$
-        <ul>
-          <li>Ridge knob: $\eta$</li>
-          <li>GD knobs: step size $\alpha$ and iteration count $k$</li>
-        </ul>
-        <p>As $k\to\infty$ with $|1-\alpha\lambda_i|&lt;1$, GD filter $\to 1/\lambda_i$ (no regularization). Smaller $k$ ⇒ stronger implicit regularization — especially on small $\lambda_i$, where $(1-\alpha\lambda_i)^k$ stays near $1$ longer.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 4 ========== -->
-    <h2 id="early">Part 4 — Early stopping as free regularization</h2>
-
-    <details open>
-      <summary>Why early $k$ suppresses small $\lambda$ <span class="tag">math</span></summary>
-      <div class="body">
-        <p>From Step E, the fraction of the OLS coefficient learned after $k$ steps is</p>
-        $$
-        \phi_i(k)=1-(1-\alpha\lambda_i)^k.
-        $$
-        <ul>
-          <li>If $\lambda_i$ is <strong>large</strong>: $|1-\alpha\lambda_i|$ smaller (for sane $\alpha$) $\Rightarrow$ $\phi_i(k)$ rises to $1$ quickly</li>
-          <li>If $\lambda_i$ is <strong>small</strong>: $1-\alpha\lambda_i\approx 1$ $\Rightarrow$ $\phi_i(k)$ rises slowly</li>
-        </ul>
-        <p>Stop at moderate $k$: large-$\lambda$ (robust) components nearly fit; small-$\lambda$ (noisy) still shrunk. Same qualitative effect as ridge’s $\lambda/(\lambda+\eta)$ shrinkage.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>“Free lunch” — what Distill means <span class="tag">claim</span></summary>
-      <div class="body">
-        <ul>
-          <li>Ridge: pick $\eta$, solve once (or retrain per $\eta$)</li>
-          <li>GD: fix $\alpha$, run once — every prefix $w_1,w_2,\ldots,w_k$ is a differently regularized model</li>
-        </ul>
-        <p>Path from underfit $\to$ overfit is “free” along the trajectory; choose stopping time with validation.</p>
-        <p class="callout">Next in Distill: momentum changes the rate at which these eigen-components converge (the $\sqrt{\kappa}$ speedup).</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Cheat sheet <span class="tag">summary</span></summary>
-      <div class="body">
-        <ul>
-          <li>$A$ / $Z^\top Z$: curvature; $q_i,\lambda_i$: eigen-directions and strengths</li>
-          <li>$\kappa=\lambda_{\max}/\lambda_{\min}$: pathological stretch</li>
-          <li>$x=Q^\top e$: readable coordinates; updates decouple</li>
-          <li>Large $\lambda$: sharp, fast, robust; small $\lambda$: flat, slow, fragile</li>
-          <li>Ridge: $1/(\lambda+\eta)$; GD: $(1/\lambda)(1-(1-\alpha\lambda)^k)$</li>
-          <li>Early stopping ≈ ridge via time instead of $\eta$</li>
-          <li>Momentum stable iff $0&lt;\alpha\lambda_i&lt;2+2\beta$ for $0\le\beta&lt;1$ (all $i$)</li>
-        </ul>
-      </div>
-    </details>
-
-    <!-- ========== PART 5 ========== -->
-    <h2 id="momentum">Part 5 — Momentum: when does it converge?</h2>
-
-    <details>
-      <summary>Intuition first <span class="tag">overview</span></summary>
-      <div class="body">
-        <p>Momentum turns each eigenmode into a <strong>2D</strong> linear system (position error + one lag). Convergence needs both eigenvalues $\sigma_1,\sigma_2$ of the step matrix $R$ to satisfy $|\sigma|&lt;1$, i.e.</p>
-        $$
-        \max\{|\sigma_1|,|\sigma_2|\}&lt;1.
-        $$
-        <p>That works out to Distill’s range $0&lt;\alpha\lambda_i&lt;2+2\beta$ for $0\le\beta&lt;1$. At $\beta=0$ you recover GD’s $0&lt;\alpha\lambda&lt;2$. As $\beta\to 1^-$, the ceiling approaches $4$ — about <strong>2×</strong> GD’s max step before diverging (stability only).</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Distill’s momentum form (velocity) <span class="tag">canon</span></summary>
-      <div class="body">
-        <p>What Distill actually writes (not the lag form):</p>
-        $$
-        \begin{aligned}
-        z^{k+1}&=\beta z^{k}+\nabla f(w^{k})\\
-        w^{k+1}&=w^{k}-\alpha z^{k+1}.
-        \end{aligned}
-        $$
-        <p>On the quadratic, $\nabla f(w)=Aw-b$. After the eigen change of basis $x^{k}=Q^{\top}(w^{k}-w^{\star})$ (and $y$ for velocity in that basis), each mode decouples:</p>
-        $$
-        \begin{aligned}
-        y_{i}^{k+1}&=\beta y_{i}^{k}+\lambda_{i}x_{i}^{k}\\
-        x_{i}^{k+1}&=x_{i}^{k}-\alpha y_{i}^{k+1}.
-        \end{aligned}
-        $$
-        In matrix form (Distill’s $R$):
-        $$
-        \begin{bmatrix}y_{i}^{k+1}\\ x_{i}^{k+1}\end{bmatrix}
-        =
-        R
-        \begin{bmatrix}y_{i}^{k}\\ x_{i}^{k}\end{bmatrix},
-        \qquad
-        R
-        =
-        \begin{bmatrix}
-        \beta & \lambda_{i}\\
-        -\alpha\beta & 1-\alpha\lambda_{i}
-        \end{bmatrix}.
-        $$
-        <p>Need $R^{k}\to 0$, i.e. both eigenvalues $\sigma$ of this $R$ satisfy $|\sigma|&lt;1$.</p>
-        <p class="callout">The two-step lag form $w_{k+1}=w_k-\alpha\nabla f(w_k)+\beta(w_k-w_{k-1})$ is a common equivalent writing of heavy ball; it uses state $(e_{k+1},e_k)$ and a <em>different-looking</em> $R$, but the same characteristic polynomial / stability region. Distill’s site uses the $(y,x)$ velocity form above.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Characteristic polynomial (Distill’s $R$) <span class="tag">proof</span></summary>
-      <div class="body">
-        $$
-        \det(\sigma I-R)
-        =
-        \det\begin{bmatrix}\sigma-\beta & -\lambda\\ \alpha\beta & \sigma-(1-\alpha\lambda)\end{bmatrix}
-        =
-        (\sigma-\beta)\bigl(\sigma-(1-\alpha\lambda)\bigr)+\alpha\beta\lambda.
-        $$
-        Expand:
-        $$
-        \sigma^2-(1-\alpha\lambda+\beta)\sigma+\beta(1-\alpha\lambda)+\alpha\beta\lambda
-        =
-        \sigma^2-(1+\beta-\alpha\lambda)\sigma+\beta.
-        $$
-        So $\sigma$ solves the same quadratic as in the lag form:
-        $$
-        \sigma^2-a\sigma+b=0,
-        \qquad
-        a:=1+\beta-\alpha\lambda,
-        \qquad
-        b:=\beta.
-        $$
-        <p>Distill’s explicit roots:</p>
-        $$
-        \sigma
-        =
-        \tfrac12\Bigl(1-\alpha\lambda+\beta\pm\sqrt{(1-\alpha\lambda+\beta)^2-4\beta}\Bigr).
-        $$
-        <p>(After $k$ steps, behavior is through $\sigma_1^k,\sigma_2^k$ — the $2\times 2$ power formula.)</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Jury criterion for degree 2 <span class="tag">tool</span></summary>
-      <div class="body">
-        <p>For a real monic quadratic $p(\sigma)=\sigma^2-a\sigma+b$, both roots lie in the open unit disk iff</p>
-        <ol>
-          <li>$p(1)&gt;0$</li>
-          <li>$p(-1)&gt;0$</li>
-          <li>$|b|&lt;1$</li>
-        </ol>
-        <p>These are the Jury / Schur-stability conditions for $n=2$.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Apply Jury $\Rightarrow$ Distill’s range <span class="tag">key</span></summary>
-      <div class="body">
-        <p><strong>Condition 3.</strong> $|b|=|\beta|&lt;1$. With the usual range $0\le\beta&lt;1$, this holds.</p>
-        <p><strong>Condition 1.</strong></p>
-        $$
-        p(1)=1-a+b=1-(1+\beta-\alpha\lambda)+\beta=\alpha\lambda.
-        $$
-        Need $\alpha\lambda&gt;0$. For $\lambda&gt;0$, this is $\alpha&gt;0$.
-        <p><strong>Condition 2.</strong></p>
-        $$
-        p(-1)=1+a+b=1+(1+\beta-\alpha\lambda)+\beta=2+2\beta-\alpha\lambda.
-        $$
-        Need $2+2\beta-\alpha\lambda&gt;0$, i.e. $\alpha\lambda&lt;2+2\beta=2(1+\beta)$.
-        <p class="callout"><strong>Theorem.</strong> For each eigenmode $\lambda_i&gt;0$ and $0\le\beta&lt;1$,
-        $$
-        \max\{|\sigma_1|,|\sigma_2|\}&lt;1
-        \quad\Longleftrightarrow\quad
-        0&lt;\alpha\lambda_i&lt;2+2\beta.
-        $$
-        Must hold for every $i$, so in particular $0&lt;\alpha\lambda_{\max}&lt;2+2\beta$.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Recover GD; factor-of-2 step-size boon <span class="tag">cor</span></summary>
-      <div class="body">
-        <ul>
-          <li>$\beta=0$: $0&lt;\alpha\lambda_i&lt;2$ — classical GD ($|1-\alpha\lambda_i|&lt;1$).</li>
-          <li>$\beta\to 1^-$: upper bound $\to 4$, twice GD’s ceiling $2$.</li>
-        </ul>
-        <p>That is Distill’s “crank up the step-size by a factor of 2 before diverging” — a statement about the <strong>stability ceiling</strong>, not yet about the optimal $\sqrt{\kappa}$ rate.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>How Distill gets $(y,x)$ from $w$ (error / eigen form) <span class="tag">derive</span></summary>
-      <div class="body">
-        <p>On the quadratic, $\nabla f(w)=Aw-b=A(w-w^\star)$.</p>
-        <p>Change of basis (error in eigen-coordinates): $x^{k}=Q^{\top}(w^{k}-w^{\star})$, and let $y^{k}$ be velocity $z$ in the same basis.</p>
-        <p>Then $A(w-w^\star)$ becomes componentwise $\lambda_i x_i$, and Distill’s update becomes the decoupled 2D system</p>
-        $$
-        y_i^{k+1}=\beta y_i^{k}+\lambda_i x_i^{k},
-        \qquad
-        x_i^{k+1}=x_i^{k}-\alpha y_i^{k+1}.
-        $$
-        <p>Fixed point: $(y,x)=(0,0)$ (at the optimum, gradient and velocity both vanish in these coordinates).</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Optional: lag form (equivalent char poly) <span class="tag">alt</span></summary>
-      <div class="body">
-        <p>Another common writing of heavy ball:</p>
-        $$
-        w_{k+1}=w_k-\alpha\nabla f(w_k)+\beta(w_k-w_{k-1}).
-        $$
-        Error $e_k=w_k-w^\star$ on one mode gives
-        $$
-        e_{k+1}=(1+\beta-\alpha\lambda)e_k-\beta e_{k-1},
-        $$
-        with companion matrix on $(e_{k+1},e_k)$ equal to
-        $\begin{bmatrix}1+\beta-\alpha\lambda&-\beta\\1&0\end{bmatrix}$.
-        <p>Different state / different $R$ matrix than Distill’s $(y,x)$ form — <strong>same</strong> characteristic polynomial $\sigma^2-(1+\beta-\alpha\lambda)\sigma+\beta$, hence same Jury region $0&lt;\alpha\lambda&lt;2+2\beta$.</p>
-        <p class="callout"><strong>Same recursion on $w$?</strong> Yes. From Distill, $z_k=(w_{k-1}-w_k)/\alpha$; eliminate $z$ to get exactly $w_{k+1}=w_k-\alpha\nabla f(w_k)+\beta(w_k-w_{k-1})$. Same algorithm on positions; the two $R$’s only use different 2D state variables. (First step / $z^0$ init can differ in bookkeeping.)</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Complex-root note: why $|\sigma|^2=\beta$ <span class="tag">Vieta</span></summary>
-      <div class="body">
-        <p>Characteristic equation:</p>
-        $$
-        \sigma^2-a\sigma+\beta=0,
-        \qquad a=1+\beta-\alpha\lambda.
-        $$
-        <p><strong>Vieta:</strong> for $\sigma^2-a\sigma+b=0$, product of roots $=b=\beta$ (always — real or complex).</p>
-        <p><strong>When roots are complex conjugates</strong> $\sigma=re^{\pm i\theta}$ (same magnitude $r=|\sigma|$):</p>
-        $$
-        \sigma_1\sigma_2=|\sigma|^2=\beta
-        $$
-        because $z\cdot\overline{z}=|z|^2$, and that product equals $\beta$.
-        <p>For $|\sigma|&lt;1$ you then need $|\sigma|^2&lt;1$, i.e. $\beta&lt;1$. So in the complex case, $\beta&lt;1$ is already forced by the product.</p>
-        <p><strong>Why $p(\pm 1)&gt;0$ still matter:</strong> $\beta&lt;1$ alone is not enough for all $(\alpha,\beta)$.</p>
-        <ul>
-          <li><strong>Complex roots:</strong> $\beta&lt;1$ gives $|\sigma|&lt;1$ from the product, but Jury’s $p(1)&gt;0$ and $p(-1)&gt;0$ still cut illegal $\alpha\lambda$ (too small / too large).</li>
-          <li><strong>Real roots:</strong> product $=\beta$ does <em>not</em> mean each $|\sigma|=\sqrt{\beta}$. One could be $2$ and the other $\beta/2$ — then $\beta&lt;1$ holds while one $|\sigma|&gt;1$. The $p(\pm 1)&gt;0$ conditions catch that and give $0&lt;\alpha\lambda&lt;2+2\beta$.</li>
-        </ul>
-        <p class="callout">Product of char-roots is always $\beta$; for conjugate pairs that product is $|\sigma|^2$, so $\beta&lt;1$ is necessary there — but the $\alpha\lambda$ window still comes from $p(\pm 1)&gt;0$.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 6 ========== -->
-    <h2 id="phase">Part 6 — Phase portraits (Distill’s grid)</h2>
-
-    <details open>
-      <summary>What the plot is <span class="tag">read</span></summary>
-      <div class="body">
-        <p>Each panel is the <strong>$(y,x)$ plane</strong> for <em>one</em> eigenmode (Distill’s velocity / position):</p>
-        <ul>
-          <li>horizontal: velocity $y$</li>
-          <li>vertical: position error $x$ (distance to the optimum along that mode)</li>
-        </ul>
-        <p>The cross at the center is $(y,x)=(0,0)$ = “at the minimum, not moving.” The curve is the path of the state as you iterate. Columns vary $\beta$; rows vary $\lambda$ (curvature of that mode). Usually $\alpha$ is fixed in the interactive.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Where is the “force” to the origin? <span class="tag">key</span></summary>
-      <div class="body">
-        <p>It’s not an extra physical force Distill invented. It’s the <strong>gradient</strong> of the quadratic, in error coordinates.</p>
-        <p>Along one mode, $f\sim\tfrac12\lambda x^2$, so</p>
-        $$
-        \nabla f \propto \lambda x.
-        $$
-        Distill’s velocity update is
-        $$
-        y\leftarrow \beta y+\lambda x.
-        $$
-        The term $\lambda x$ is the “force”:</p>
-        <ul>
-          <li>if $x&gt;0$ (above optimum), $\lambda x&gt;0$ adds positive velocity contribution that, after $x\leftarrow x-\alpha y$, tends to pull $x$ <em>down</em> toward $0$</li>
-          <li>if $x&lt;0$, $\lambda x&lt;0$ pulls the other way — still toward $0$</li>
-        </ul>
-        <p>So “external force returning to the origin” = <strong>restoring gradient</strong> of a bowl centered at the optimum. Larger $\lambda$ = steeper bowl = stronger pull (bottom rows of the grid).</p>
-        <p class="callout">$\beta$ is damping on old velocity (friction). $\lambda$ is spring-like restoring from curvature. Together they act like a damped harmonic oscillator in the $(y,x)$ plane.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>How to read the grid <span class="tag">patterns</span></summary>
-      <div class="body">
-        <ul>
-          <li><strong>Top row $\lambda=0$:</strong> no restoring gradient. Only velocity decay from $\beta&lt;1$. At $\beta=1$, constant velocity (straight path). Not converging to a “minimum” because there is no bowl.</li>
-          <li><strong>Left column $\beta=1$, $\lambda&gt;0$:</strong> restoring force but no damping $\Rightarrow$ closed orbits (undamped oscillator) — forever circling, never settles.</li>
-          <li><strong>$\beta&lt;1$ and $\lambda&gt;0$:</strong> spirals into $(0,0)$ — damped oscillator = convergent momentum.</li>
-          <li><strong>Moving down (bigger $\lambda$):</strong> stronger spring; orbits / spirals change shape (often tighter / different period).</li>
-          <li><strong>Moving right (smaller $\beta$):</strong> more friction; settles with less endless circling.</li>
-        </ul>
-        <p>Critical $\beta$ near $(1-\sqrt{\alpha\lambda})^2$ is where Distill marks the nicest damping for that mode (underdamped / critical / overdamped transition).</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Is this 1D? <span class="tag">clarify</span></summary>
-      <div class="body">
-        <p><strong>Position along one mode:</strong> yes — $x_i$ is a single scalar (1D error on eigen-direction $i$).</p>
-        <p><strong>Momentum state for that mode:</strong> 2D — you need $(y_i,x_i)$ (velocity + position), which is why the phase plot is a plane.</p>
-        <p><strong>Full problem:</strong> $n$-dimensional $w$, but after the eigenbasis it <em>decouples</em> into $n$ independent copies of this 1D-position / 2D-state system (one panel’s dynamics per $\lambda_i$).</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>“Weight on a spring” — accurate? <span class="tag">nuance</span></summary>
-      <div class="body">
-        <p><strong>Your skepticism is fair.</strong> Distill’s discrete equations are <em>not</em> copied from $m\ddot x=-kx-c\dot x$ line-for-line.</p>
-        <p>What <em>is</em> accurate:</p>
-        <ul>
-          <li>On a quadratic mode, the continuous-time heavy-ball ODE is
-          $\ddot x+\gamma\dot x+\lambda x=0$ — that <strong>is</strong> a damped harmonic oscillator (mass–spring–damper).</li>
-          <li>Discrete momentum is a discrete cousin of that ODE. Same qualitative behaviors: orbits if undamped ($\beta=1$), spirals if damped ($\beta&lt;1$), stronger $\lambda$ like a stiffer spring.</li>
-        </ul>
-        <p>What is <em>analogy / storytelling</em>:</p>
-        <ul>
-          <li>$y\leftarrow\beta y+\lambda x$ then $x\leftarrow x-\alpha y$ is an optimization update, not a literal physics integrator with $F=-kx$ written out.</li>
-          <li>Naming $y$ “velocity” and $\lambda x$ “force” is pedagogical — the $\lambda x$ term plays the restoring role, $\beta$ the damping role.</li>
-        </ul>
-        <p class="callout">Use the spring picture to remember the phase portraits. For proofs, trust $R$ and $|\sigma|&lt;1$, not Hooke’s law.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>What $D$ is (and why we care) <span class="tag">plot</span></summary>
-      <div class="body">
-        <p>Yes — $D$ is <strong>just the discriminant</strong> of the characteristic polynomial
-        $\sigma^2-(1+\beta-\alpha\lambda)\sigma+\beta$:</p>
-        $$
-        D=(1+\beta-\alpha\lambda)^2-4\beta.
-        $$
-        <p>It only tells you what kind of roots $\sigma$ you have:</p>
-        <ul>
-          <li>$D&lt;0$ — complex conjugates → underdamped, $\rho=\sqrt{\beta}$</li>
-          <li>$D=0$ — repeated root → critical damping, still $\rho=\sqrt{\beta}$</li>
-          <li>$D&gt;0$ — two real roots → overdamped, $\rho\ge\sqrt{\beta}$ (usually worse)</li>
-        </ul>
-        <p>We care because the thing we actually optimize is the <strong>rate</strong> $\rho=\max|\sigma|$, and the formula for $\rho$ <em>changes</em> with the sign of $D$. The optimal $(\alpha,\beta)$ lives on $D=0$ at both spectral ends — not because $D$ is sacred, but because that’s where you get the smallest equalized $\rho=\sqrt{\beta}$.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>How to get critical $\beta=(1-\sqrt{\alpha\lambda})^2$ <span class="tag">derive</span></summary>
-      <div class="body">
-        <p>Critical damping for one mode $=$ eigenvalues of $R$ <strong>repeated</strong> (discriminant zero). Start from the char poly</p>
-        $$
-        \sigma^2-(1+\beta-\alpha\lambda)\sigma+\beta=0.
-        $$
-        Discriminant:
-        $$
-        D=(1+\beta-\alpha\lambda)^2-4\beta.
-        $$
-        Set $D=0$ for a repeated root:
-        $$
-        (1+\beta-\alpha\lambda)^2=4\beta.
-        $$
-        Take square roots (both signs possible):
-        $$
-        1+\beta-\alpha\lambda=\pm 2\sqrt{\beta}.
-        $$
-        Write $u=\sqrt{\beta}$ (so $\beta=u^2$, and $0\le u&lt;1$ for $0\le\beta&lt;1$):
-        $$
-        1+u^2-\alpha\lambda=\pm 2u
-        \quad\Leftrightarrow\quad
-        u^2\mp 2u+(1-\alpha\lambda)=0.
-        $$
-        <p><strong>Minus sign</strong> (the usual critical branch Distill uses):</p>
-        $$
-        u^2-2u+(1-\alpha\lambda)=0
-        \quad\Leftrightarrow\quad
-        (u-1)^2=\alpha\lambda
-        \quad\Leftrightarrow\quad
-        u=1-\sqrt{\alpha\lambda}
-        $$
-        (take the root with $u\ge 0$, which needs $\alpha\lambda\le 1$). Then
-        $$
-        \beta=u^2=(1-\sqrt{\alpha\lambda})^2.
-        $$
-        <p>For <strong>one mode</strong>, Distill’s formula $\beta=(1-\sqrt{\alpha\lambda})^2$ is the legal root of the <strong>plus</strong> branch; the other plus-root $u=1+\sqrt{\alpha\lambda}$ has $\beta&gt;1$. For <strong>two extremes</strong>, both $\pm$ signs get used — see the algebra section below.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 7 ========== -->
-    <h2 id="optimal">Part 7 — Optimal $(\alpha,\beta)$ over all modes</h2>
-
-    <details open>
-      <summary>What the min–max means <span class="tag">read</span></summary>
-      <div class="body">
-        <p>Each eigenmode $i$ has its own step matrix</p>
-        $$
-        R(\lambda_i)
-        =
-        \begin{bmatrix}
-        \beta & \lambda_i\\
-        -\alpha\beta & 1-\alpha\lambda_i
-        \end{bmatrix}.
-        $$
-        Convergence rate for that mode $\approx\rho\bigl(R(\lambda_i)\bigr)=\max\{|\sigma_1|,|\sigma_2|\}$ (Distill’s $\|\cdot\|$ = spectral radius / max $|\sigma|$).
-        <p>Overall rate is limited by the <strong>worst</strong> mode:</p>
-        $$
-        \rho_{\mathrm{worst}}(\alpha,\beta)=\max_i\,\rho\bigl(R(\lambda_i)\bigr).
-        $$
-        Choose hyperparameters to minimize that worst case:
-        $$
-        \min_{\alpha,\beta}\;\max_i\,\rho\bigl(R(\lambda_i)\bigr).
-        $$
-      </div>
-    </details>
-
-    <details open>
-      <summary>What are the “extremal matrices”? <span class="tag">key</span></summary>
-      <div class="body">
-        <p>Not a special construction — they are just $R(\lambda)$ at the <strong>extreme eigenvalues</strong> of the curvature $A$ (or $Z^\top Z$):</p>
-        $$
-        \lambda_{\min}=\lambda_1,
-        \qquad
-        \lambda_{\max}=\lambda_n
-        $$
-        (Distill’s sorted $\lambda_1\le\cdots\le\lambda_n$).
-        <p>So the extremal matrices are</p>
-        $$
-        R(\lambda_{\min})
-        =
-        \begin{bmatrix}\beta&\lambda_{\min}\\ -\alpha\beta&1-\alpha\lambda_{\min}\end{bmatrix},
-        \qquad
-        R(\lambda_{\max})
-        =
-        \begin{bmatrix}\beta&\lambda_{\max}\\ -\alpha\beta&1-\alpha\lambda_{\max}\end{bmatrix}.
-        $$
-        <p><strong>Why only these matter:</strong> for fixed $(\alpha,\beta)$, the function $\lambda\mapsto\rho\bigl(R(\lambda)\bigr)$ on the interval $[\lambda_{\min},\lambda_{\max}]$ is typically worst at an endpoint. The bottleneck modes are the flattest and/or sharpest — the extremes of the spectrum. Interior $\lambda_i$ are easier once the ends are controlled.</p>
-        <p class="callout">“Find extremal matrices” = take $\lambda_{\min}$ and $\lambda_{\max}$ of $A$, plug into Distill’s $R(\cdot)$. No extra search over weird matrices.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>What is $\rho$? Which roots? What “typically”? <span class="tag">clarify</span></summary>
-      <div class="body">
-        <p><strong>$\rho(R)$ = spectral radius</strong> = magnitude of the largest eigenvalue of $R$:</p>
-        $$
-        \rho(R)=\max\{|\sigma_1|,|\sigma_2|\}.
-        $$
-        That’s Distill’s $\|\cdot\|$ in the min–max. After $k$ steps, error scales like $\rho^k$ (roughly). Smaller $\rho$ = faster. Write $\rho(\lambda)$ as shorthand for $\rho\bigl(R(\lambda)\bigr)$ at fixed $(\alpha,\beta)$.</p>
-
-        <p><strong>Which roots to set equal?</strong> Two different “equal” ideas:</p>
-        <ol>
-          <li><strong>Repeated roots inside one $R(\lambda)$:</strong> for that fixed $\lambda$, set $\sigma_1=\sigma_2$ (discriminant $0$) — critical damping for that mode. Then $\rho(\lambda)=|\sigma_1|=|\sigma_2|$.</li>
-          <li><strong>Equal rates across the two extremes:</strong> choose global $(\alpha,\beta)$ so
-          $$
-          \rho\bigl(R(\lambda_{\min})\bigr)=\rho\bigl(R(\lambda_{\max})\bigr)
-          $$
-          and both are on that critical (repeated-root) boundary. You are <em>not</em> setting a root of $R(\lambda_{\min})$ equal to a root of $R(\lambda_{\max})$ as complex numbers necessarily — you equalize their <strong>$\rho$ values</strong> (the convergence rates).</li>
-        </ol>
-
-        <p><strong>Why babysit the endpoints?</strong> The spectrum that appears is only $\lambda\in[\lambda_{\min},\lambda_{\max}]$. For heavy-ball’s $\rho(\lambda)$ in the regimes Distill cares about, the worst rate on that interval is at an <strong>endpoint</strong> (flat and/or sharp). Middle $\lambda$ are not the bottleneck for the min–max. (My earlier “typically” was hedging — for this analysis, the design problem reduces to the two extremes.)</p>
-        $$
-        \max_i\rho\bigl(R(\lambda_i)\bigr)=\max\bigl\{\rho(R(\lambda_{\min})),\,\rho(R(\lambda_{\max}))\bigr\}.
-        $$
-
-        <p><strong>Why equalizing those two $\rho$’s is optimal (minimax intuition):</strong></p>
-        <ol>
-          <li>You want $\min_{\alpha,\beta}\,M(\alpha,\beta)$ where $M=\max\{\rho_{\min},\rho_{\max}\}$ and $\rho_{\min}=\rho(R(\lambda_{\min}))$, etc.</li>
-          <li>If at some $(\alpha,\beta)$ you had $\rho_{\min}&gt;\rho_{\max}$, you could nudge $(\alpha,\beta)$ to reduce the larger one (trading a bit of the smaller) and lower $M$. Same if $\rho_{\max}&gt;\rho_{\min}$. So any local minimum of $M$ must have $\rho_{\min}=\rho_{\max}$ — an <strong>equalizer</strong>.</li>
-          <li>For this family, that equalizer sits where both ends are critically damped (repeated roots), which yields Distill’s
-          $$
-          \alpha=\left(\frac{2}{\sqrt{\lambda_{\min}}+\sqrt{\lambda_{\max}}}\right)^2,
-          \qquad
-          \beta=\left(\frac{\sqrt{\lambda_{\max}}-\sqrt{\lambda_{\min}}}{\sqrt{\lambda_{\max}}+\sqrt{\lambda_{\min}}}\right)^2,
-          $$
-          with $M=(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$, $\kappa=\lambda_{\max}/\lambda_{\min}$.</li>
-          <li><strong>Global optimality among first-order methods</strong> on this quadratic class is the stronger claim: that rate matches Nesterov’s lower bound, so you can’t beat it (in that narrow sense) with a better linear first-order scheme. Distill’s “optimal” leans on that, not only on “equalizer looks nice.”</li>
-        </ol>
-        <p class="callout">Equal $\rho$ at the extremes $\Rightarrow$ optimal for <em>this</em> min–max over $(\alpha,\beta)$. Matching the lower bound $\Rightarrow$ optimal more broadly among first-order methods on worst-case quadratics.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Why the equalizer is at critical damping (both ends) <span class="tag">why</span></summary>
-      <div class="body">
-        <p>For one mode, the char poly has product of roots $=\beta$. Split regimes by the discriminant $D=(1+\beta-\alpha\lambda)^2-4\beta$:</p>
-        <ul>
-          <li><strong>Underdamped</strong> ($D&lt;0$, complex conjugates): $|\sigma_1|=|\sigma_2|=\sqrt{\beta}$, so
-          $$
-          \rho(\lambda)=\sqrt{\beta}
-          $$
-          — <em>same for every</em> $\lambda$ that is underdamped. Independent of $\lambda$!</li>
-          <li><strong>Critical</strong> ($D=0$): repeated root, still $\rho=\sqrt{\beta}$.</li>
-          <li><strong>Overdamped</strong> ($D&gt;0$, real roots): $\sigma_1\sigma_2=\beta$, so
-          $$
-          \rho=\max\{|\sigma_1|,|\sigma_2|\}\ge\sqrt{\beta},
-          $$
-          with strict $&gt;$ unless the roots are equal. Overdamping is never better than $\sqrt{\beta}$ for that mode.</li>
-        </ul>
-
-        <p><strong>So for the min–max:</strong> you never want either extreme overdamped — that only raises $\rho$ above $\sqrt{\beta}$. While both ends are underdamped, $M=\max(\rho_{\min},\rho_{\max})=\sqrt{\beta}$. To minimize $M$, <strong>decrease $\beta$</strong> as much as possible while keeping both $\lambda_{\min}$ and $\lambda_{\max}$ underdamped (or critical).</p>
-
-        <p>You can lower $\beta$ until one end hits $D=0$ (critical). If the other end is still comfortably underdamped, you still have room to retune $\alpha$ and push $\beta$ down further until <strong>both</strong> ends sit on $D=0$ with the same $\beta$. That’s the equalizer at critical damping for both extremes — Distill’s $(\alpha,\beta)$ formulas.</p>
-
-        <p class="callout">Underdamped $\Rightarrow\rho=\sqrt{\beta}$ for free at both ends. Smallest such $\beta$ $\Rightarrow$ both ends pinned to the critical boundary. Overdamping either end only makes $M$ worse.</p>
-        <p><strong>Same $\beta$ for both?</strong> Yes — one global $(\alpha,\beta)$ for the whole optimizer. Both extremes share that same $\beta$ (and same $\alpha$).</p>
-        <p><strong>Is the optimum always at $D=0$?</strong> For <em>this</em> problem (heavy ball on a quadratic, min–max $\rho$ over $\lambda\in[\lambda_{\min},\lambda_{\max}]$): yes — the optimal $(\alpha,\beta)$ puts <strong>both</strong> ends on $D=0$. Not a vague “often”: that’s the equalizer characterized above. Outside that setting (neural nets, Adam, stochastic grads, etc.) you do <em>not</em> get to claim “always critically damp $\lambda_{\min}$ and $\lambda_{\max}$.”</p>
-        <p><strong>If $D&lt;0$ (strictly underdamped), is anything optimal?</strong> No — not for this min–max. While both extremes have $D&lt;0$, you have $M=\sqrt{\beta}$, and you can lower $\beta$ a little, stay underdamped, and get a strictly smaller $M$. So any point with both ends strictly inside $D&lt;0$ is improvable. Optimum is on the boundary $D=0$ (both ends), not in the open underdamped region.</p>
-        <p><strong>How does lowering $\beta$ change $D$?</strong> For fixed $(\alpha,\lambda)$,
-        $$
-        D(\beta)=(1+\beta-\alpha\lambda)^2-4\beta.
-        $$
-        Differentiate:
-        $$
-        \frac{\partial D}{\partial\beta}=2(1+\beta-\alpha\lambda)-4=2(\beta-\alpha\lambda-1).
-        $$
-        With $0\le\beta&lt;1$ and $\alpha\lambda&gt;0$, typically $\beta-\alpha\lambda-1&lt;0$, so $\partial D/\partial\beta&lt;0$. Therefore <strong>lowering $\beta$ raises $D$</strong> (same direction for every mode): underdamped ($D&lt;0$) $\to$ critical ($D=0$) $\to$ overdamped ($D&gt;0$).</p>
-        <p>Both ends move the same way when you lower the shared $\beta$, but they hit $D=0$ at <em>different</em> $\beta$ if $\alpha$ is held fixed (because $\beta^\star=(1-\sqrt{\alpha\lambda})^2$ depends on $\lambda$). That’s why you retune $\alpha$ as well so both ends hit $D=0$ together.</p>
-        <p><strong>Paradox: different $\lambda$, same $(\alpha,\beta)$, both $D=0$ — how?</strong> $D=0$ means
-        $$
-        1+\beta-\alpha\lambda=\pm 2\sqrt{\beta}
-        $$
-        — <em>two</em> branches. You cannot put both $\lambda_{\min}$ and $\lambda_{\max}$ on the <em>same</em> branch with one $(\alpha,\beta)$ (that would force $\lambda_{\min}=\lambda_{\max}$). The optimum puts them on <strong>opposite</strong> branches:</p>
-        $$
-        \begin{aligned}
-        1+\beta-\alpha\lambda_{\min}&=+2\sqrt{\beta}
-        \quad\Rightarrow\quad
-        \alpha\lambda_{\min}=(1-\sqrt{\beta})^2,\\
-        1+\beta-\alpha\lambda_{\max}&=-2\sqrt{\beta}
-        \quad\Rightarrow\quad
-        \alpha\lambda_{\max}=(1+\sqrt{\beta})^2.
-        \end{aligned}
-        $$
-        Two equations, two unknowns $(\alpha,\beta)$. Solving gives Distill’s formulas
-        $$
-        \sqrt{\beta}=\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1},
-        \qquad
-        \alpha=\Bigl(\frac{2}{\sqrt{\lambda_{\min}}+\sqrt{\lambda_{\max}}}\Bigr)^2,
-        \quad\kappa=\frac{\lambda_{\max}}{\lambda_{\min}}.
-        $$
-        So it <em>is</em> possible: same $\beta$, both discriminants zero, different signs in the $\pm$.</p>
-        <p><strong>Why “allowed” to use $+$ on one end and $-$ on the other?</strong> Both $\pm$ always make $D=0$ algebraically. The filter is <em>feasibility</em> of $(\alpha,\beta)$ ($0\le\beta&lt;1$, etc.), not a forever ban on $-$.</p>
-        <ul>
-          <li><strong>One mode, $\alpha$ and $\lambda$ fixed $\to$ solve for $\beta$:</strong> on the <em>plus</em> branch, $(u-1)^2=\alpha\lambda$ gives $u=1\pm\sqrt{\alpha\lambda}$. Keep $u=1-\sqrt{\alpha\lambda}$; discard $u=1+\sqrt{\alpha\lambda}&gt;1$. (Correction: that illegal root is from the <strong>$+$</strong> branch, not the $-$ branch.)</li>
-          <li><strong>Minus branch, fixed $(\alpha,\lambda)$:</strong> $(1+u)^2=\alpha\lambda$ $\Rightarrow$ $u=\sqrt{\alpha\lambda}-1$ (needs $\alpha\lambda\ge 1$). Different curve — not “forces $\beta&gt;1$.”</li>
-          <li><strong>Two modes, solve for $(\alpha,\beta)$ together:</strong> $+$ on $\lambda_{\min}$ and $-$ on $\lambda_{\max}$ $\Rightarrow$ Distill’s formulas with $u&lt;1$.</li>
-        </ul>
-        <p class="callout">Earlier slip: $u=1+\sqrt{\alpha\lambda}$ is the bad root of the <strong>plus</strong> branch, not something the minus branch forces.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Full algebra: single-mode vs two-mode $\pm$ <span class="tag">derive</span></summary>
-      <div class="body">
-        <p>$D=0$ always means</p>
-        $$
-        1+\beta-\alpha\lambda=\pm 2\sqrt{\beta}.
-        $$
-        Let $u=\sqrt{\beta}$ (so $\beta=u^2$, want $0\le u&lt;1$).
-
-        <p><strong>Case A — one mode, fix $(\alpha,\lambda)$, solve for $u$</strong></p>
-        <p>Plus branch $1+u^2-\alpha\lambda=+2u$:</p>
-        $$
-        (u-1)^2=\alpha\lambda
-        \quad\Rightarrow\quad
-        u=1\pm\sqrt{\alpha\lambda}.
-        $$
-        Keep $u=1-\sqrt{\alpha\lambda}\in[0,1)$ (needs $\alpha\lambda\le 1$) $\Rightarrow$ $\beta=(1-\sqrt{\alpha\lambda})^2$. Discard $u=1+\sqrt{\alpha\lambda}&gt;1$ ($\beta&gt;1$).
-        <p>Minus branch $1+u^2-\alpha\lambda=-2u$:</p>
-        $$
-        (1+u)^2=\alpha\lambda
-        \quad\Rightarrow\quad
-        u=\sqrt{\alpha\lambda}-1
-        $$
-        (needs $\alpha\lambda\ge 1$ for $u\ge 0$). Different critical curve; not Distill’s usual single-mode formula $\beta=(1-\sqrt{\alpha\lambda})^2$.
-        <p><strong>Critical curve</strong> (for one fixed $\lambda$): the set of $(\alpha,\beta)$ with $D(\alpha,\beta;\lambda)=0$ — i.e. that mode is exactly critically damped. In the $(\alpha,\beta)$-plane it’s a curve (e.g. $\beta=(1-\sqrt{\alpha\lambda})^2$ on the usual branch). Above/below it (in $\beta$) you’re under/over-damped for that $\lambda$. Different $\lambda$ $\Rightarrow$ different curves; the two-endpoint optimum is where you sit on $\lambda_{\min}$’s curve and $\lambda_{\max}$’s curve at once (opposite $\pm$ branches).</p>
-
-        <p><strong>Case B — two modes, unknowns $(\alpha,\beta)$, both $D=0$</strong></p>
-        Assign opposite signs (this is the choice that works):
-        $$
-        \begin{aligned}
-        1+\beta-\alpha\lambda_{\min}&=+2u
-        \quad\Rightarrow\quad
-        \alpha\lambda_{\min}=(1-u)^2,\\[0.4em]
-        1+\beta-\alpha\lambda_{\max}&=-2u
-        \quad\Rightarrow\quad
-        \alpha\lambda_{\max}=(1+u)^2.
-        \end{aligned}
-        $$
-        Divide the two equations ($\alpha&gt;0$, $\lambda&gt;0$):
-        $$
-        \frac{\lambda_{\max}}{\lambda_{\min}}=\frac{(1+u)^2}{(1-u)^2}
-        \quad\Rightarrow\quad
-        \sqrt{\kappa}=\frac{1+u}{1-u},
-        \quad\kappa=\frac{\lambda_{\max}}{\lambda_{\min}}.
-        $$
-        Solve for $u$:
-        $$
-        \sqrt{\kappa}\,(1-u)=1+u
-        \quad\Rightarrow\quad
-        \sqrt{\kappa}-1=u(\sqrt{\kappa}+1)
-        \quad\Rightarrow\quad
-        u=\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}.
-        $$
-        Hence
-        $$
-        \beta=u^2=\Biggl(\frac{\sqrt{\lambda_{\max}}-\sqrt{\lambda_{\min}}}{\sqrt{\lambda_{\max}}+\sqrt{\lambda_{\min}}}\Biggr)^2\in[0,1)
-        $$
-        for $\kappa\ge 1$. Then from $\alpha\lambda_{\min}=(1-u)^2$:
-        $$
-        1-u=1-\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}=\frac{2}{\sqrt{\kappa}+1},
-        $$
-        $$
-        \alpha=\frac{(1-u)^2}{\lambda_{\min}}=\frac{4}{\lambda_{\min}(\sqrt{\kappa}+1)^2}=\Biggl(\frac{2}{\sqrt{\lambda_{\min}}+\sqrt{\lambda_{\max}}}\Biggr)^2,
-        $$
-        since $\lambda_{\min}(\sqrt{\kappa}+1)^2=(\sqrt{\lambda_{\min}}+\sqrt{\lambda_{\max}})^2$.
-
-        <p class="callout">Joint solve: $-$ on $\lambda_{\max}$ means $\alpha\lambda_{\max}=(1+u)^2$ with the <em>same</em> $u=(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)&lt;1$. The discarded $u=1+\sqrt{\alpha\lambda}$ was never this minus equation — it was the other root of the plus branch with fixed $\alpha$.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Is $\beta=0$ (plain GD) optimal? <span class="tag">cor</span></summary>
-      <div class="body">
-        <p>No, when $\kappa&gt;1$. $\beta=0$ is the extreme overdamped end; for GD the worst-case factor is about $(\kappa-1)/(\kappa+1)$, worse than momentum’s $(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$. Optimal $\beta$ equals $0$ only if $\lambda_{\min}=\lambda_{\max}$.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Poor conditioning $\Rightarrow$ $\beta\to 1$, $\alpha\approx 2\times$ GD <span class="tag">guideline</span></summary>
-      <div class="body">
-        <p>Optimal formulas again ($\kappa=\lambda_{\max}/\lambda_{\min}$):</p>
-        $$
-        \alpha^\star=\Biggl(\frac{2}{\sqrt{\lambda_{\min}}+\sqrt{\lambda_{\max}}}\Biggr)^2,
-        \qquad
-        \beta^\star=\Biggl(\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}\Biggr)^2.
-        $$
-        <p><strong>When conditioning is poor</strong> ($\kappa\to\infty$, $\sqrt{\lambda_{\max}}\gg\sqrt{\lambda_{\min}}$):</p>
-        $$
-        \beta^\star\to 1,
-        \qquad
-        \alpha^\star\approx\Biggl(\frac{2}{\sqrt{\lambda_{\max}}}\Biggr)^2=\frac{4}{\lambda_{\max}}.
-        $$
-        <p>GD’s stability ceiling is $\alpha&lt;2/\lambda_{\max}$ (from $0&lt;\alpha\lambda_{\max}&lt;2$). Momentum’s ceiling is $\alpha\lambda&lt;2+2\beta$; with $\beta\approx 1$ that is $\alpha&lt;4/\lambda_{\max}$. So</p>
-        $$
-        \alpha^\star_{\mathrm{mom}}\approx\frac{4}{\lambda_{\max}}=2\cdot\frac{2}{\lambda_{\max}}\approx 2\times\alpha^{\max}_{\mathrm{GD}}.
-        $$
-        <p>Same story vs the usual GD rate-optimal $\alpha_{\mathrm{GD}}=2/(\lambda_{\min}+\lambda_{\max})\approx 2/\lambda_{\max}$ when $\kappa$ is huge: ratio $\alpha^\star/\alpha_{\mathrm{GD}}\to 2$.</p>
-        <p class="callout">Distill’s practical rule: set $\beta$ close to $1$, then raise $\alpha$ until you’re just shy of diverging. You’re again living on the stability knife-edge — just a higher edge than plain GD, because $2+2\beta\approx 4$ allows roughly twice the step.</p>
-        <p><strong>Why that rule?</strong></p>
-        <ol>
-          <li><strong>Theory says $\beta^\star\approx 1$</strong> when $\kappa$ is large — so pick $\beta$ near $1$ without knowing $\lambda$’s exactly.</li>
-          <li><strong>Theory says $\alpha^\star$ sits near the stability ceiling</strong> for that $\beta$ (about $4/\lambda_{\max}$). You usually don’t know $\lambda_{\max}$, but you can <em>feel</em> the ceiling: raise $\alpha$ until training blows up, then back off slightly. Same heuristic people use for GD, where the ceiling was $2/\lambda_{\max}$.</li>
-          <li><strong>Why “knife-edge is good”:</strong> for this quadratic analysis the rate-optimal $\alpha$ is not a timid small step — it’s as large as stability allows (given $\beta$). Too small $\alpha$ $\Rightarrow$ slow; too large $\Rightarrow$ diverge. Best is just under the edge.</li>
-          <li><strong>Why $2+2\beta\approx 4$:</strong> Jury gave $0&lt;\alpha\lambda_i&lt;2+2\beta$. At $\beta\approx 1$, $\alpha\lambda_{\max}&lt;4$, so $\alpha&lt;4/\lambda_{\max}$, vs GD’s $\alpha&lt;2/\lambda_{\max}$ at $\beta=0$. Factor of two in the max step.</li>
-        </ol>
-        <p><strong>But didn’t we want to decrease $\beta$?</strong> That was a different move. If both ends are underdamped, $M=\sqrt{\beta}$, so lowering $\beta$ helps <em>until</em> you hit the critical equalizer $D=0$ at both ends. For large $\kappa$, that landing value is still
-        $$
-        \beta^\star=\Bigl(\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}\Bigr)^2\approx 1
-        $$
-        (e.g. $\kappa=10^4\Rightarrow\beta^\star\approx 0.96$). You’re decreasing from “even closer to $1$” down to $\beta^\star$, <em>not</em> all the way to $0$. Going to $\beta=0$ (GD) leaves the equalizer and makes the worst-case rate much worse.</p>
-        <p class="callout">Decrease $\beta$ only while you’re above $\beta^\star$ in the underdamped region. The practical rule “$\beta$ close to $1$” means “use $\beta^\star\sim 1$ for bad $\kappa$,” not “minimize $\beta$.”</p>
-        <p><strong>Reset if confused — one picture:</strong></p>
-        <ul>
-          <li>Goal: make the worst mode shrink as fast as possible ($M$ small).</li>
-          <li>If both ends underdamped: $M=\sqrt{\beta}$. Smaller $\beta$ $\Rightarrow$ smaller $M$ — <em>but only until</em> you hit the best legal point $\beta^\star$.</li>
-          <li>For a badly conditioned problem, that best legal point is still <strong>high</strong>: $\beta^\star\approx 0.9$–$0.99$, not $0$.</li>
-          <li>Example: $\kappa=100\Rightarrow\beta^\star=((10-1)/(10+1))^2\approx 0.67$; $\kappa=10^4\Rightarrow\beta^\star\approx 0.96$. Bad $\kappa$ $\Rightarrow$ $\beta^\star$ closer to $1$.</li>
-          <li>Practical rule = guess that high $\beta^\star$, then push $\alpha$ up to the edge. Do <strong>not</strong> set $\beta=0$.</li>
-        </ul>
-        <p>“Decrease $\beta$” = don’t sit at $0.999$ if $\beta^\star=0.96$. “$\beta$ near $1$” = for hard problems $\beta^\star$ itself is near $1$. Same story.</p>
-        <p><strong>Distill’s caveat — optimal $\neq$ fastest in every sense:</strong> $(\alpha^\star,\beta^\star)$ minimize the <em>asymptotic rate</em> $\rho$ (how error shrinks like $\rho^k$ for large $k$). Transient / early steps can look worse (oscillations, slower start) with another $(\alpha,\beta)$ winning for the first many iterations. So “optimal” here = best long-run contraction factor, not “reaches $\varepsilon$ in fewest steps from every start.”</p>
-        <p><strong>Why isn’t that the same as short-term?</strong> The full error is more like
-        $$
-        e_k \approx A\,\sigma_1^k + B\,\sigma_2^k
-        $$
-        (or a spiral if complex). The rate $\rho=\max|\sigma|$ only says which term <em>dominates for large $k$</em>. Early on:</p>
-        <ul>
-          <li>the constants $A,B$ and the second mode still matter a lot</li>
-          <li>underdamped optima often <strong>oscillate</strong> — error can go up and down; path length to $\varepsilon$ isn’t just $\rho^k$</li>
-          <li>a slightly larger $\rho$ with less oscillation can hit a moderate tolerance sooner, then lose if you need tiny error</li>
-        </ul>
-        <p>So “minimize $\rho$” = best eventual shrink speed, not “smallest $\|e_k\|$ for every $k$.”</p>
-        <p><strong>Is plain GD “minimizing error every step”?</strong> No. GD steps opposite the gradient (steepest descent for a <em>tiny</em> step). With a finite $\alpha$ it can overshoot; the usual “optimal” GD $\alpha=2/(\lambda_{\min}+\lambda_{\max})$ is also about asymptotic rate, not “smallest error at every $k$.” Momentum’s caveat isn’t unique — GD has the same asymptotic-vs-finite-time gap; it just oscillates less when $\beta=0$.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 8 ========== -->
-    <h2 id="fourier">Part 8 — Colorization / “Fourier” eigenmodes</h2>
-
-    <details open>
-      <summary>What Distill means here <span class="tag">read</span></summary>
-      <div class="body">
-        <p>In the colorization / grid-smoothing example, the curvature matrix $A$ is like a graph Laplacian (local averaging). Its eigenvectors behave like a <strong>Fourier basis</strong> on the grid:</p>
-        <ul>
-          <li><strong>Large $\lambda$</strong> ↔ <strong>high frequency</strong> — wiggly, local, pixel-to-neighbor mismatch</li>
-          <li><strong>Small $\lambda$</strong> ↔ <strong>low frequency</strong> — smooth, global, large-scale color structure</li>
-        </ul>
-        <p>Same GD fact you already know: error along mode $i$ shrinks as $(1-\alpha\lambda_i)^k$.</p>
-        <ul>
-          <li>high $\lambda$ $\Rightarrow$ dies fast $\Rightarrow$ GD quickly fixes local / high-frequency errors</li>
-          <li>low $\lambda$ $\Rightarrow$ crawls $\Rightarrow$ GD is bad at global / low-frequency errors</li>
-        </ul>
-        <p class="callout">“Generalized Fourier basis” = eigenmodes look like frequency bands. Momentum helps because it speeds up those stubborn small-$\lambda$ (low-frequency) directions — the $\sqrt{\kappa}$ story in picture form (ink diffusing vs surfing global structure).</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Why $\lambda_1=0$ with all-ones eigenvector <span class="tag">graph</span></summary>
-      <div class="body">
-        <p>For a (combinatorial) graph Laplacian $L=D-A$ ($D$ degrees, $A$ adjacency):</p>
-        $$
-        (Lx)_i=\sum_{j\sim i}(x_i-x_j).
-        $$
-        If $x=\mathbf{1}$ (all ones), every difference $x_i-x_j=0$, so $L\mathbf{1}=0$. Thus $\lambda=0$ is always an eigenvalue with eigenvector “constant on all nodes.”</p>
-        <p><strong>Link to connectivity:</strong></p>
-        <ul>
-          <li>If the graph is <strong>connected</strong>, the $0$-eigenspace is 1-dimensional — only constant vectors. Next eigenvalue $\lambda_2&gt;0$ (algebraic connectivity / Fiedler value).</li>
-          <li>If the graph has <strong>$k$ connected components</strong>, $\lambda=0$ has multiplicity $k$ (constants on each component independently).</li>
-        </ul>
-        <p>So “first eigenvalue always 0, eigenvector all ones” = “a global constant shift has no Laplacian penalty.” How many zeros you get tells you how many separate pieces the graph has. In colorization, that constant mode is “overall color level” with no local contrast cost — a pure low-frequency / null direction for the smoother.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>“Hard functions” / limits of first-order methods <span class="tag">nesterov</span></summary>
-      <div class="body">
-        <p>The principle so far: <strong>small-$\lambda$ / low-frequency modes are what make first-order methods slow</strong> (GD crawls; even momentum is limited by $\sqrt{\kappa}$).</p>
-        <p>Distill’s next move: invent losses that are <em>as bad as possible</em> for any method that only uses gradients — pack in a chain of stubborn directions so that after $k$ steps you still haven’t “felt” the whole problem (information moves one eigen-direction per step in the worst case).</p>
-        <p>That yields a <strong>lower bound</strong>: no first-order method (GD, momentum, …) can beat a certain rate on that class. Momentum matching that bound is why Distill calls it optimal “in a narrow technical sense.”</p>
-        <p class="callout">“Taken to the extreme” = not a real colorization grid, but a crafted worst-case $f$ that maximizes how painful low-frequency / sequential structure is — so you see the ceiling of what gradient-only methods can do.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Colorization objective: smoother + colorizer <span class="tag">how</span></summary>
-      <div class="body">
-        <p>Distill’s toy loss (schematically). Here $x\in\mathbb{R}^n$ is a <strong>vector</strong> — one value per node/pixel (e.g. color intensity on the grid):</p>
-        $$
-        \min_x\;
-        \underbrace{\tfrac12 x^\top L_G x}_{\text{smoother}}
-        +
-        \underbrace{\tfrac12\sum_{i\in D}\bigl(x^\top e_i e_i^\top x - e_i^\top x\bigr)}_{\text{colorizer}}
-        $$
-        <p><strong>Smoother.</strong> For a combinatorial graph Laplacian $L_G=D-A$,</p>
-        $$
-        x^\top L_G x=\sum_{(i,j)\in E}(x_i-x_j)^2
-        $$
-        with <strong>no</strong> $\tfrac12$ on the right (each undirected edge once). The $\tfrac12$ in $\tfrac12 x^\top L_G x$ is only so $\nabla f=L_G x$; it doesn’t change the minimizer.</p>
-        <p><strong>What is $\sum_{i,j}A_{ij}(x_i-x_j)^2$?</strong> Sum over <em>all ordered pairs</em> $(i,j)$. $A_{ij}=1$ (or the edge weight) if $i\sim j$, else $0$ — so only neighbors contribute. For an undirected graph $A_{ij}=A_{ji}$, each undirected edge $\{i,j\}$ appears <strong>twice</strong> in that sum: once as $(i,j)$ and once as $(j,i)$, with the same $(x_i-x_j)^2$. Hence
-        $$
-        \sum_{i,j}A_{ij}(x_i-x_j)^2=2\sum_{(i,j)\in E}(x_i-x_j)^2=2\,x^\top Lx,
-        $$
-        and the identity $x^\top Lx=\tfrac12\sum_{i,j}A_{ij}(x_i-x_j)^2$ just cancels that double count.</p>
-        <p><strong>Colorizer.</strong> $D$ = pixels with known color. $e_i$ = <strong>$i$th unit vector</strong> — all zeros except a $1$ in slot $i$ (e.g. $e_2=(0,1,0,\ldots)^\top$). So $e_i^\top x=x_i$ and $x^\top e_i e_i^\top x=x_i^2$: it picks out pixel $i$ only. With the written term $\tfrac12(x_i^2-x_i)$, the 1D minimum is at $x_i=\tfrac12$ (not $1$). A realistic colorizer would use $\tfrac12(x_i-c_i)^2$ and pull toward the true known color $c_i$.</p>
-        <p><strong>Why “small low-rank correction”?</strong> Expanding, the colorizer adds
-        $$
-        \tfrac12 x^\top\Bigl(\sum_{i\in D}e_i e_i^\top\Bigr)x
-        -\tfrac12\Bigl(\sum_{i\in D}e_i\Bigr)^\top x
-        $$
-        to the smoother. The Hessian gains $\sum_{i\in D}e_i e_i^\top$, a diagonal matrix with $|D|$ ones — rank at most $|D|$ (usually $\ll n$). So total curvature is
-        $$
-        A=L_G+\sum_{i\in D}e_i e_i^\top
-        $$
-        = Laplacian + sparse/low-rank pins. The linear term is the “target color” pull.</p>
-        <p class="callout">Smoother wants global consistency; colorizer injects a few hard facts. First-order methods still struggle on the slow (small-$\lambda$) modes of $A$ — the colorizer doesn’t remove pathological conditioning by itself.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 9 ========== -->
-    <h2 id="firstorder">Part 9 — First-order methods as “linear combo of past gradients”</h2>
-
-    <details open>
-      <summary>What is $\gamma_i^k$? (not the momentum $y$) <span class="tag">read</span></summary>
-      <div class="body">
-        <p>Distill writes the class of first-order methods as</p>
-        $$
-        w^{k+1}=w^{0}+\sum_{i=0}^{k}\gamma_i^k\,\nabla f(w^{i})
-        \qquad\text{for some coefficients }\gamma_i^k.
-        $$
-        <p><strong>$\gamma_i^k$</strong> (gamma) = how much the gradient from step $i$ is weighted when forming $w^{k+1}$. It depends on both $i$ (which past gradient) and $k$ (which iterate you’re building).</p>
-        <p>This is <em>not</em> Distill’s momentum velocity $y_i^k$. Different symbol: $\gamma$ vs $y$.</p>
-        <ul>
-          <li><strong>GD:</strong> $w^{k+1}=w^0-\alpha\sum_{i=0}^{k}\nabla f(w^i)$, so $\gamma_i^k=-\alpha$ (same for all past grads).</li>
-          <li><strong>Momentum:</strong> unrolled, older grads get larger effective weight; $\gamma_i^k$ depends on $\beta$ and how many steps ago $i$ was (Distill: involving $(1-\beta^{k+1-i})/(1-\beta)$, up to sign/$\alpha$).</li>
-        </ul>
-        <p class="callout">Idea: any method in this class only ever moves in the span of gradients seen so far. That’s the playground for Nesterov’s lower bound.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 10: Convex Rosenbrock / Distill hard fn ========== -->
-    <h2 id="convex-rosenbrock">Part 10 — Distill’s “Convex Rosenbrock”: prove $w_i^\star$</h2>
-
-    <details open>
-      <summary>Setup and claim <span class="tag">read</span></summary>
-      <div class="body">
-        <p>Worst-case path graph (Nesterov’s flavor), written as colorizer + couplings + ridge:</p>
-        $$
-        f^n(w)
-        =\underbrace{\tfrac12(w_1-1)^2}_{\text{colorizer at node 1}}
-        +\underbrace{\tfrac12\sum_{i=1}^{n}(w_i-w_{i+1})^2}_{\text{path edges}}
-        +\underbrace{\tfrac{2}{\kappa-1}\|w\|^2}_{\text{small ridge}},
-        \qquad \kappa&gt;1.
-        $$
-        <p><strong>Claim (Distill).</strong> With
-        $$
-        q:=\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}\in(0,1),
-        $$
-        the minimizer is the geometric sequence
-        $$
-        w_i^\star=q^i.
-        $$
-        Exact for the infinite chain $i=1,2,\ldots$; for finite $n$ it is the large-$n$ / limiting form (Distill: $\kappa(f^n)\to\kappa$ as $n$ grows). The far-end boundary residual is $O(q^n)\to 0$.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Proof: stationarity ⇒ geometric $q^i$ <span class="tag">proof</span></summary>
-      <div class="body">
-        <p><strong>Step 0 — useful identity.</strong> From $q=(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$ one gets $\sqrt{\kappa}=(1+q)/(1-q)$, hence
-        $$
-        \kappa-1=\frac{4q}{(1-q)^2}
-        \quad\Rightarrow\quad
-        \frac{4}{\kappa-1}=\frac{(1-q)^2}{q}.
-        $$
-
-        <p><strong>Step 1 — gradients.</strong> Differentiating (path + ridge; Distill’s formula for $i\neq 1$):
-        $$
-        \begin{aligned}
-        \partial_1 f
-        &= (w_1-1)+(w_1-w_2)+\tfrac{4}{\kappa-1}w_1,\\[0.35em]
-        \partial_i f
-        &= 2w_i-w_{i-1}-w_{i+1}+\tfrac{4}{\kappa-1}w_i,
-        \qquad i\ge 2.
-        \end{aligned}
-        $$
-        (Strong convexity ⇒ unique critical point = global min.)</p>
-
-        <p><strong>Step 2 — interior recurrence.</strong> Set $\partial_i f=0$ for $i\ge 2$:
-        $$
-        w_{i+1}-\Bigl(2+\tfrac{4}{\kappa-1}\Bigr)w_i+w_{i-1}=0.
-        $$
-        Characteristic root ansatz $w_i=r^i$:
-        $$
-        r^2-\Bigl(2+\tfrac{4}{\kappa-1}\Bigr)r+1=0.
-        $$
-        Using Step 0, $r=q$ is a root. The other root is $1/q&gt;1$ (product of roots $=1$). Bounded / $\ell_2$ solutions along an infinite path force the $1/q$ coefficient to vanish, so
-        $$
-        w_i=A\,q^i.
-        $$
-
-        <p><strong>Step 3 — left boundary fixes $A=1$ (expanded).</strong> Interior equations only say “shape is geometric”: $w_i=A q^i$. The colorizer at node 1 sets the <em>scale</em> $A$.</p>
-        <p>Stationarity at $i=1$:</p>
-        $$
-        \underbrace{(w_1-1)}_{\text{colorizer}}+\underbrace{(w_1-w_2)}_{\text{edge }1\sim 2}+\underbrace{\tfrac{4}{\kappa-1}w_1}_{\text{ridge}}=0.
-        $$
-        Plug $w_1=Aq$, $w_2=Aq^2$:
-        $$
-        (Aq-1)+(Aq-Aq^2)+\tfrac{4}{\kappa-1}(Aq)=0.
-        $$
-        Factor $A$ in the middle term: $Aq-Aq^2=Aq(1-q)$. Use $\tfrac{4}{\kappa-1}=(1-q)^2/q$, so the ridge piece is
-        $$
-        \tfrac{4}{\kappa-1}(Aq)=\frac{(1-q)^2}{q}\cdot Aq=A(1-q)^2.
-        $$
-        Equation becomes:
-        $$
-        Aq-1+Aq(1-q)+A(1-q)^2=0
-        \quad\Rightarrow\quad
-        A\bigl[q+q(1-q)+(1-q)^2\bigr]=1.
-        $$
-        Expand the bracket:
-        $$
-        q+q-q^2+(1-2q+q^2)=2q-q^2+1-2q+q^2=1.
-        $$
-        So $A\cdot 1=1$ ⇒ $A=1$ ⇒ $w_i^\star=q^i$.</p>
-        <p>Intuition: the colorizer wants $w_1\approx 1$, but the chain + ridge pull $w_1$ down to $q&lt;1$. The unique scale that balances “pull to 1” vs “pull toward $0$ along the path” is exactly $A=1$ (not $A=1/q$, which would set $w_1=1$ and break the interior recurrence).</p>
-
-        <p><strong>Step 4 — sanity check interior.</strong> For $w_i=q^i$, $i\ge 2$:
-        $$
-        2q^i-q^{i-1}-q^{i+1}+\tfrac{4}{\kappa-1}q^i
-        =q^{i-1}\Bigl(2q-1-q^2+(1-q)^2\Bigr)
-        =q^{i-1}\cdot 0=0.
-        $$
-
-        <p class="callout">Why this $q$? Same algebraic number as the optimal momentum rate $\rho^\star=(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$. The hard path’s optimum <em>itself</em> decays at that rate along the chain — which is what makes “you need $\sim k$ steps to touch coordinate $k$” give a matching lower bound.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>“Speed of light” lower bound — what it means <span class="tag">read</span></summary>
-      <div class="body">
-        <p><strong>Local gradients ⇒ information hops one edge per step.</strong> On this path, $\nabla f_i$ only sees $w_{i-1},w_i,w_{i+1}$. Any method of the form
-        $$
-        w^{k}=w^{0}+\sum_{i&lt;k}\gamma_i\,\nabla f(w^{i})
-        $$
-        can only mix information that has already reached those coordinates. Starting at $w^0=0$, after $k$ steps the far coordinates $i\ge k+1$ are still untouched — still $0$.</p>
-        <p><strong>Untouched coords still pay full error.</strong> There $w_i^k=0$ but $w_i^\star=q^i$, so
-        $$
-        \|w^k-w^\star\|_\infty
-        \ge\max_{i\ge k+1}|w_i^\star|
-        =q^{k+1}
-        =q^k\,\|w^0-w^\star\|_\infty
-        $$
-        (since $\|w^0-w^\star\|_\infty=q$). No clever choice of the $\gamma$’s beats that on <em>this</em> $f$.</p>
-        <p><strong>Spiritual, not literal.</strong> It does <em>not</em> say “training is forever stuck at $\sqrt{\kappa}$.” It says: <em>if</em> you only use gradients, <em>and</em> you refuse to change the problem, <em>and</em> an adversary hands you this path, then $\sqrt{\kappa}$ is the ceiling. Real ML losses are not this path; the bound is a warning about conditioning + locality, not a stop sign.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Why $\kappa(f^n)\to\kappa$ as $n\to\infty$ <span class="tag">why</span></summary>
-      <div class="body">
-        <p>First separate two meanings of “$\kappa$.” In the formula for $f^n$, the symbol $\kappa$ is a <strong>design parameter</strong>: it only appears inside the ridge coefficient $\tfrac{2}{\kappa-1}$. By itself, that does not yet mean the optimization problem is $\kappa$-conditioned. The <strong>true condition number</strong> of the problem is a property of the Hessian $H=\nabla^2 f^n$, namely the ratio of its largest eigenvalue to its smallest:
-        $$
-        \kappa(f^n)=\frac{\lambda_{\max}(H)}{\lambda_{\min}(H)}.
-        $$
-        Distill’s claim is that when the path gets longer and longer, this true ratio settles to the same number you typed into the ridge.</p>
-
-        <p>Conceptually, the Hessian has three pieces:
-        $$
-        H
-        =
-        L_{\mathrm{path}}
-        +
-        \underbrace{\tfrac{4}{\kappa-1}}_{c}\,I
-        +
-        e_1e_1^\top.
-        $$
-        The path Laplacian $L_{\mathrm{path}}$ measures how much neighboring nodes disagree; its eigenvalues describe “spatial frequencies” along the chain, from a flat global mode (eigenvalue near $0$) to a rapidly alternating mode (eigenvalue near $4$). The ridge term $cI$ adds the same positive curvature $c$ in every direction, which is what makes the problem strongly convex. The colorizer $e_1e_1^\top$ only pins the first coordinate, so it is a small local correction compared with a long chain.</p>
-
-        <p>For a long path, the Laplacian eigenvalues fill out the interval $[0,4]$. After adding the ridge, the Hessian eigenvalues therefore live near the interval $[c,\,4+c]$. Their ratio is then about $(4+c)/c$. Substituting $c=\tfrac{4}{\kappa-1}$ gives exactly $(4+c)/c=\kappa$. That is why the design parameter and the true condition number agree in the large-$n$ limit.</p>
-
-        <p>For a short path the Laplacian only has a few discrete eigenvalues, so the largest one may sit well below $4$ and $\kappa(f^n)$ can differ from the design value. Lengthening the chain packs more eigenvalues into $[0,4]$ and pushes the spectral edges to $0$ and $4$, which forces $\kappa(f^n)\to\kappa$.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Proof: $\kappa(f^n)\to\kappa$ <span class="tag">proof</span></summary>
-      <div class="body">
-        <p><strong>What we will prove.</strong> Let $f^n$ be Distill’s path objective with design parameter $\kappa&gt;1$. Write $m=n+1$ for the number of variables $w_1,\ldots,w_{n+1}$, and set $c:=\tfrac{4}{\kappa-1}&gt;0$. We claim that the true condition number $\kappa(f^n)=\lambda_{\max}(H_n)/\lambda_{\min}(H_n)$ tends to $\kappa$ as $n\to\infty$ (equivalently as $m\to\infty$).</p>
-
-        <p><strong>Hessian.</strong> Differentiating the quadratic pieces shows
-        $$
-        H_n=L_m+cI+e_1e_1^\top,
-        $$
-        where $L_m$ is the combinatorial Laplacian of the path graph on $m$ nodes. The ridge $\tfrac{2}{\kappa-1}\|w\|^2$ contributes $cI$, the neighbor couplings contribute $L_m$, and the colorizer $\tfrac12(w_1-1)^2$ contributes the rank-one matrix $e_1e_1^\top$. A short algebraic check that we will use at the end is
-        $$
-        \frac{4+c}{c}=1+\frac{4}{c}=1+(\kappa-1)=\kappa.
-        $$
-
-        <p><strong>Step 1 — eigenvalues of the path Laplacian.</strong></p>
-        <p>Recall what $L_m$ means. For a vector $w$ on the $m$ nodes of the path, the quadratic form is
-        $$
-        w^\top L_m w=\sum_{i=1}^{m-1}(w_i-w_{i+1})^2.
-        $$
-        This only cares about <em>neighbor disagreements</em>. If you change $w$ along a direction $v$ (an eigenvector with $L_mv=\mu v$ and $\|v\|=1$), the coupling energy is exactly $v^\top L_m v=\mu$. In the smoother $\tfrac12 w^\top L_m w$, moving a unit step in direction $v$ therefore raises the loss by $\tfrac12\mu$. That is why we call $\mu$ the <strong>curvature</strong> of that pattern: it is how sharply the path couplings punish that shape of $w$.</p>
-
-        <p><strong>Soft vs stiff patterns.</strong> A <em>soft</em> pattern (small $\mu$) is one where neighboring entries of $v$ are similar, so $\sum(v_i-v_{i+1})^2$ is small — the chain barely notices. A <em>stiff</em> pattern (large $\mu$) has neighbors disagreeing a lot, so the same sum is large — the couplings fight that shape hard. Extremes:</p>
-        <ul>
-          <li><strong>Softest ($\mu=0$):</strong> the constant pattern $v=(1,1,\ldots,1)$. Every neighbor difference is $0$. Flat along the whole path.</li>
-          <li><strong>Stiffest ($\mu\to 4$):</strong> the most <em>oscillatory</em> path mode — see next paragraph.</li>
-        </ul>
-
-        <p><strong>What “oscillatory path mode” means.</strong> Think of the values $v_1,v_2,\ldots,v_m$ as a discrete wave sitting on the chain. Low-frequency modes vary slowly: many nodes in a row share roughly the same sign and size (almost constant, or one long hill). High-frequency / oscillatory modes flip sign often as you walk along the path — e.g. roughly $+,-,+,-,\ldots$. Each edge then sees a large $(v_i-v_{i+1})^2$, so $v^\top L_m v$ is large. The top eigenvector of the path Laplacian is the highest-frequency discrete sine/cosine the finite chain can hold: neighbors are pushed as opposite as a path allows. That is the stiff pattern whose curvature $\mu_m$ approaches $4$. “Oscillatory” = rapid sign/value changes along the node index, not motion in time.</p>
-
-        <p>For the path graph, those eigenvalues are known in closed form. Index them $j=1,\ldots,m$:
-        $$
-        \mu_j=2-2\cos\Bigl(\frac{(j-1)\pi}{m}\Bigr)=4\sin^2\Bigl(\frac{(j-1)\pi}{2m}\Bigr).
-        $$
-        The second form makes the range obvious, because $\sin^2(\cdot)$ always lies in $[0,1]$, so every $\mu_j$ automatically lies in $[0,4]$.</p>
-
-        <p><em>The smallest eigenvalue.</em> Set $j=1$. Then the angle is $0$, so $\mu_1=0$. The matching eigenvector is the constant vector $\mathbf{1}=(1,1,\ldots,1)$. That matches the quadratic form: if every node has the same value, every difference $w_i-w_{i+1}$ is zero, so the path couplings contribute nothing. In optimization language, a pure global shift along the path is invisible to $L_m$.</p>
-
-        <p><em>The largest eigenvalue.</em> Set $j=m$. Then
-        $$
-        \mu_m=2-2\cos\Bigl(\frac{(m-1)\pi}{m}\Bigr)=2+2\cos\Bigl(\frac{\pi}{m}\Bigr),
-        $$
-        because $\cos(\pi-\pi/m)=-\cos(\pi/m)$. For any finite $m$ we have $\cos(\pi/m)&lt;1$, so $\mu_m&lt;4$. But as the path gets longer, $\pi/m\to 0$ and $\cos(\pi/m)\to 1$, hence
-        $$
-        \mu_m\to 2+2\cdot 1=4.
-        $$
-        So the stiffest path mode gets arbitrarily close to curvature $4$, but never reaches it for finite $m$. That top mode is the most oscillatory pattern the chain can hold (neighboring nodes pushed in opposite directions as much as a discrete path allows).</p>
-
-        <p><em>What happens as $m$ grows.</em> For each fixed $m$ you only get $m$ eigenvalues, lined up between $0$ and $\mu_m&lt;4$. When $m$ is small, those are a sparse handful of points, and $\mu_m$ may still be noticeably below $4$. When $m$ is large, two things happen at once: the top value $\mu_m$ climbs toward $4$, and the intermediate angles $(j-1)\pi/m$ become a fine grid in $[0,\pi)$. Consequently the numbers $\mu_j$ become a fine grid of points filling the whole interval $[0,4]$. That is what “the spectrum fills $[0,4]$” means — not that every real number in $[0,4]$ is suddenly an eigenvalue, but that the discrete eigenvalues become dense in that interval and their extremes approach $0$ and $4$.</p>
-
-        <p>For the rest of the proof we only need the edges: $\mu_{\min}(L_m)=0$ for every $m$, and $\mu_{\max}(L_m)\to 4$ as $m\to\infty$.</p>
-
-        <p><strong>Step 2 — what the ridge alone would do.</strong> Adding $cI$ shifts every Laplacian eigenvalue by $c$, so the eigenvalues of $L_m+cI$ lie in $[c,\,\mu_m+c]$. The condition number of this matrix is therefore
-        $$
-        \kappa(L_m+cI)=\frac{\mu_m+c}{c}.
-        $$
-        Sending $m\to\infty$ replaces $\mu_m$ by $4$, and we obtain $(4+c)/c=\kappa$. So if there were no colorizer, the claim would already be finished: the ridge was deliberately scaled so that “Laplacian up to $4$, plus ridge $c$” produces condition number $\kappa$.</p>
-
-        <p><strong>Step 3 — the colorizer does not change the limiting edges.</strong> The real Hessian is $H_n=(L_m+cI)+e_1e_1^\top$. We must check that pinning the first coordinate does not permanently move $\lambda_{\min}$ or $\lambda_{\max}$ away from $c$ and $4+c$.</p>
-
-        <p><em>Smallest eigenvalue.</em> Because $e_1e_1^\top$ is positive semidefinite, curvature can only increase, so $\lambda_{\min}(H_n)\ge\lambda_{\min}(L_m+cI)=c$. For a matching upper bound, test the constant vector $\mathbf{1}$. The Laplacian kills constants, the ridge contributes $c$, and the colorizer contributes only $1/m$ after normalizing by $\|\mathbf{1}\|^2=m$:
-        $$
-        \lambda_{\min}(H_n)
-        \le\frac{\mathbf{1}^\top H_n\mathbf{1}}{\mathbf{1}^\top\mathbf{1}}
-        =c+\frac{1}{m}.
-        $$
-        As $m\to\infty$ this upper bound tends to $c$. Combined with $\lambda_{\min}(H_n)\ge c$, the squeeze theorem gives $\lambda_{\min}(H_n)\to c$. Intuitively: on a long chain, spreading a constant across many nodes dilutes the single colorizer pin, so the softest direction still has curvature essentially equal to the ridge alone.</p>
-
-        <p><em>Largest eigenvalue.</em> Let $v^{(m)}$ be a unit-length top eigenvector of $L_m$, so $L_m v^{(m)}=\mu_m v^{(m)}$. That mode is highly oscillatory along the path, and its first entry satisfies $v^{(m)}_1\to 0$ as $m\to\infty$ (amplitude spreads over the whole chain). The Rayleigh quotient for $H_n$ on this vector is
-        $$
-        (v^{(m)})^\top H_n v^{(m)}
-        =\mu_m+c+(v^{(m)}_1)^2
-        \to 4+c,
-        $$
-        which forces $\lambda_{\max}(H_n)\ge 4+c$ in the limit. Since adding $e_1e_1^\top$ can increase any eigenvalue by at most $1$, and the top mode feels only an $o(1)$ bump from the first coordinate, one also gets $\lambda_{\max}(H_n)=\mu_m+c+o(1)\to 4+c$. So the stiffest direction still approaches curvature $4+c$: the colorizer is a local pin and does not redesign the most oscillatory path mode.</p>
-
-        <p><strong>Step 4 — pass to the ratio.</strong> We have shown $\lambda_{\min}(H_n)\to c$ and $\lambda_{\max}(H_n)\to 4+c$. Therefore
-        $$
-        \kappa(f^n)=\frac{\lambda_{\max}(H_n)}{\lambda_{\min}(H_n)}\to\frac{4+c}{c}=\kappa,
-        $$
-        which is the claim. ∎</p>
-
-        <p class="callout">In words: the path supplies a fixed spectral width $[0,4]$, the ridge lifts that window by $c$, and their ratio was engineered to equal the design $\kappa$. The colorizer matters for the optimum $w^\star$, but for large $n$ it is negligible when you only ask about the extreme eigenvalues that define the condition number.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>In depth: “$\kappa(f^n)\to\kappa$ and the gap closes” <span class="tag">read</span></summary>
-      <div class="body">
-        <p>Three different $\kappa$-related objects are in play. Distill’s sentence is about them lining up.</p>
-
-        <p><strong>1. Design parameter $\kappa$.</strong> The number you put in the ridge $\tfrac{2}{\kappa-1}\|w\|^2$. It is an input to building $f^n$, not automatically equal to the true condition number of $f^n$.</p>
-
-        <p><strong>2. True condition number $\kappa(f^n)$.</strong> See the section above for the Hessian argument $H=L_{\mathrm{path}}+cI+e_1e_1^\top$ and why $\kappa(f^n)\to\kappa$.</p>
-
-        <p><strong>3. Two rates that both equal $q=(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$ when everything matches.</strong></p>
-        <ul>
-          <li><strong>Upper bound (momentum can do this).</strong> On any $\mu$-strongly convex $L$-smooth quadratic with condition number $\kappa_{\mathrm{act}}$, optimally tuned momentum contracts errors like
-            $$
-            \rho^\star=\frac{\sqrt{\kappa_{\mathrm{act}}}-1}{\sqrt{\kappa_{\mathrm{act}}}+1}.
-            $$
-            So on $f^n$, momentum promises about $\rho^\star\big(\kappa(f^n)\big)^k$.</li>
-          <li><strong>Lower bound (nothing first-order can beat this on $f^n$).</strong> The speed-of-light argument gives, for this concrete $f^n$ (design $\kappa$),
-            $$
-            \|w^k-w^\star\|_\infty \ge q(\kappa)^k\,\|w^0-w^\star\|_\infty,
-            $$
-            with the same algebraic $q$ built from the <em>design</em> $\kappa$ (because $w_i^\star=q(\kappa)^i$).</li>
-        </ul>
-
-        <p><strong>What “the gap” is.</strong> For finite $n$, $\kappa(f^n)$ need not equal the design $\kappa$. Then momentum’s certificate is $\rho^\star(\kappa(f^n))$, while the information lower bound is $q(\kappa_{\mathrm{design}})$. Those need not be identical — a small mismatch between “how bad the Hessian looks” and “how far the optimum’s mass sits down the chain.” That mismatch is the gap.</p>
-
-        <p><strong>What “the gap closes” means.</strong> Send $n\to\infty$. Then $\kappa(f^n)\to\kappa_{\mathrm{design}}$, so
-        $$
-        \rho^\star\big(\kappa(f^n)\big) \;\longrightarrow\; q(\kappa_{\mathrm{design}}).
-        $$
-        Momentum’s best-case rate on this problem and the algorithm-independent lower bound on this problem become the <em>same number</em>. There is no room left for a cleverer choice of coefficients $\gamma_i^k$ to asymptotically beat momentum on $f^n$: anything in the linear first-order class is already sandwiched.</p>
-
-        <p><strong>“We cannot do better” — scoped carefully.</strong></p>
-        <ul>
-          <li>Better = asymptotically faster than $q^k$ on <em>this</em> $f^n$ (large $n$), using only linear combinations of past gradients.</li>
-          <li>It does <em>not</em> forbid faster methods that use Hessian/Fisher, change variables, or optimize a different objective with smaller effective $\kappa$.</li>
-          <li>It also matches the abstract Nesterov story: over the whole class of smooth strongly convex problems with condition number $\kappa$, the worst-case rate is $q(\kappa)^k$, and this path family is a concrete witness that the worst case is tight.</li>
-        </ul>
-
-        <p class="callout">One-line version: Distill built a family where (i) information can only crawl along a path and (ii) the Hessian’s $\kappa$ is dialed to the same knob that sets $w^\star$’s decay. Large $n$ makes (ii) exact, so the crawl-speed lower bound and momentum’s $\sqrt{\kappa}$ upper bound become one statement — optimality of momentum inside that narrow class.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Where to look for speedups anyway <span class="tag">how</span></summary>
-      <div class="body">
-        <p>Distill’s own escape hatch: <strong>reformulate so $\kappa$ itself changes</strong> — don’t try to beat the lower bound on a fixed hard $f$; make a better-conditioned $f$.</p>
-        <ul>
-          <li><strong>Preconditioning / curvature:</strong> multiply steps by (approx) $H^{-1}$ or Fisher$^{-1}$ (Newton, natural gradient, Shampoo, K-FAC). You’re no longer “gradient-only” in the original metric — $\kappa$ in the new coordinates can be far smaller.</li>
-          <li><strong>Adaptive first-order (Adam/AdamW):</strong> diagonal rescaling from gradient history ≈ cheap preconditioner. Same spirit: change effective conditioning per coordinate.</li>
-          <li><strong>Muon / orthogonalized updates:</strong> reshape the step (e.g. toward spectral / orthogonal geometry) so you don’t fight the raw Euclidean $\kappa$ of $w$.</li>
-          <li><strong>Architecture &amp; parameterization:</strong> residuals, normalization, μP, better init — change the loss landscape’s $\kappa$ before the optimizer runs.</li>
-          <li><strong>Data / objective surgery:</strong> curriculum, loss reweighting, constraint reformulation — again, different $f$, different $\kappa$.</li>
-          <li><strong>Break the algorithm class:</strong> variance reduction, second-order, distributed all-reduce structure, etc. The lower bound only constrains linear combinations of past gradients on a fixed $f$.</li>
-        </ul>
-        <p class="callout">Punchline for LLM training: Distill’s closure is “momentum is optimal <em>as a pure first-order method on worst-case smooth strongly convex $f$</em>.” The live research (and your brainlift lane) is mostly the other door — <em>change the geometry / the problem</em> so that effective $\kappa$ is nicer.</p>
-      </div>
-    </details>
-
-    <!-- ========== PART 11: stochastic ========== -->
-    <h2 id="stochastic">Part 11 — Momentum with noisy gradients</h2>
-
-    <details open>
-      <summary>Distill’s displayed sum pulls $\varepsilon$ out wrong <span class="tag">fix</span></summary>
-      <div class="body">
-        <p>Distill writes something like
-        $$
-        \begin{pmatrix}y_i^k\\ x_i^k\end{pmatrix}
-        =
-        R^k\begin{pmatrix}y_i^0\\ x_i^0\end{pmatrix}
-        +
-        \epsilon_i^k\sum_{j=1}^{k}R^{k-j}\begin{pmatrix}1\\-\alpha\end{pmatrix},
-        $$
-        with a caption $\epsilon^k=Q\cdot\mathrm{error}(w^k)$. The <strong>vector</strong> $\begin{pmatrix}1\\-\alpha\end{pmatrix}$ is fine; factoring a single $\epsilon_i^k$ in front of the whole sum is not (unless every past noise equaled the current one).</p>
-
-        <p><strong>Correct one-step map.</strong> Noisy momentum in eigen-coordinates (gradient noise $\epsilon_i^k$ added into the velocity update):
-        $$
-        \begin{aligned}
-        y_i^{k+1}&=\beta y_i^k+\lambda_i x_i^k+\epsilon_i^k,\\
-        x_i^{k+1}&=x_i^k-\alpha y_i^{k+1}.
-        \end{aligned}
-        $$
-        In matrix form that is
-        $$
-        \begin{pmatrix}y_i^{k+1}\\ x_i^{k+1}\end{pmatrix}
-        =
-        R\begin{pmatrix}y_i^k\\ x_i^k\end{pmatrix}
-        +
-        \epsilon_i^k\begin{pmatrix}1\\-\alpha\end{pmatrix},
-        \qquad
-        R=\begin{pmatrix}\beta&\lambda_i\\-\alpha\beta&1-\alpha\lambda_i\end{pmatrix}.
-        $$
-
-        <p><strong>Correct unroll.</strong> Each step injects its <em>own</em> noise, then that kick is propagated by later $R$’s:
-        $$
-        \begin{pmatrix}y_i^k\\ x_i^k\end{pmatrix}
-        =
-        R^k\begin{pmatrix}y_i^0\\ x_i^0\end{pmatrix}
-        +
-        \sum_{j=0}^{k-1}\epsilon_i^{j}\,R^{k-1-j}\begin{pmatrix}1\\-\alpha\end{pmatrix}.
-        $$
-        Equivalently (reindex $j\leftarrow j+1$):
-        $$
-        \sum_{j=1}^{k}\epsilon_i^{j-1}\,R^{k-j}\begin{pmatrix}1\\-\alpha\end{pmatrix}.
-        $$
-        Noise stays <strong>inside</strong> the sum. Distill’s figure is what you would get only if $\epsilon_i^0=\epsilon_i^1=\cdots=\epsilon_i^{k-1}=\epsilon_i^k$ (one shared scalar), which is not the SGD model.</p>
-
-      </div>
-    </details>
-
-    <details open>
-      <summary>In depth: what the stochastic $\mathbf{E}[(x_i^k)^2]$ term really is <span class="tag">read</span></summary>
-      <div class="body">
-        <p><strong>Goal.</strong> After $k$ noisy momentum steps, the eigenmode error $x_i^k$ is random. Distill splits “deterministic error vs stochastic error.” Here we derive what that stochastic piece is, carefully, and why their figure is a sloppy shorthand for a real variance calculation.</p>
-
-        <p><strong>1. Split the state into signal + noise-driven part.</strong> From the correct unroll, write
-        $$
-        s_i^k
-        :=
-        \begin{pmatrix}y_i^k\\ x_i^k\end{pmatrix}
-        =
-        \underbrace{R^k s_i^0}_{\text{noiseless trajectory from init}}
-        +
-        \underbrace{\sum_{j=0}^{k-1}\epsilon_i^{j}\,R^{k-1-j}v}_{\text{sum of past kicks}},
-        \qquad
-        v:=\begin{pmatrix}1\\-\alpha\end{pmatrix}.
-        $$
-        The first term is exactly what you would get with perfect gradients. The second is every gradient noise $\epsilon_i^{j}$ injected at step $j$, then pushed forward $(k-1-j)$ times by the same matrix $R$ that runs the clean dynamics. So noise does not live in a separate world — it is filtered by momentum’s linear system.</p>
-
-        <p><strong>2. Read off the position coordinate.</strong> We care about excess loss on this mode, which for a centered quadratic is $\tfrac12\lambda_i(x_i^k)^2$. Let $e_2=(0,1)^\top$, so $x_i^k=e_2^\top s_i^k$. Then
-        $$
-        x_i^k
-        =
-        e_2^\top R^k s_i^0
-        +
-        \sum_{j=0}^{k-1}\epsilon_i^{j}\,\underbrace{\bigl(e_2^\top R^{k-1-j}v\bigr)}_{=:\,\gamma_{k-1-j}}.
-        $$
-        The scalar $\gamma_\ell:=e_2^\top R^\ell v$ is the position impulse response (explained next).</p>
-
-        <p><strong>What $v=(1,-\alpha)^\top$ is.</strong> Recall the noisy update on one mode:
-        $$
-        y^{+}=\beta y+\lambda x+\varepsilon,
-        \qquad
-        x^{+}=x-\alpha y^{+}.
-        $$
-        Compared with the noiseless map $s\mapsto Rs$, the only new piece is the $+\varepsilon$ inside $y^{+}$. That immediately changes position too, because $x^{+}$ uses the <em>updated</em> velocity:
-        $$
-        \Delta y=\varepsilon,
-        \qquad
-        \Delta x=-\alpha\varepsilon.
-        $$
-        So one unit of noise ($\varepsilon=1$) adds the vector $v=(1,-\alpha)^\top$ to the state $(y,x)$ on that same step. The top $1$ is “noise landed in velocity”; the bottom $-\alpha$ is “and the position step $x\leftarrow x-\alpha y$ therefore moved by $-\alpha$ as well.”</p>
-
-        <p><strong>What $\gamma_\ell$ means.</strong> After that kick, the optimizer keeps running the <em>noiseless</em> linear map $R$ for later steps. If the state just after the kick is $v$ (and we ignore the clean signal), then $\ell$ steps later the state is $R^\ell v$. The position coordinate of that vector is
-        $$
-        \gamma_\ell
-        :=
-        e_2^\top R^\ell v
-        =
-        \text{(position component of $R^\ell v$)}.
-        $$
-        So $\gamma_\ell$ answers: “I injected a unit gradient-noise kick now; $\ell$ steps later, how much position error $x$ remains from that kick alone?” That is the definition of an impulse response for a linear system, read out on the $x$ channel.</p>
-
-        <p><strong>Why $\gamma_0=-\alpha$.</strong> At lag $\ell=0$ we have not applied any further $R$ yet: $R^0=I$, so
-        $$
-        \gamma_0=e_2^\top v=-\alpha.
-        $$
-        Same-step effect only: noise has not had time to bounce through momentum/curvature; it only moved $x$ through the immediate $-\alpha y$ update.</p>
-
-        <p><strong>Why later $\gamma_\ell$ “mix through $R$.”</strong> For $\ell\ge 1$, $R^\ell v$ applies the full coupled dynamics again and again. Velocity feeds position, position (via $\lambda x$) feeds the next velocity, momentum $\beta$ carries old velocity forward, and so on. So the remnant of that one kick in $x$ is no longer just $-\alpha$; it is whatever the $(y,x)$ oscillator / damper still holds after $\ell$ steps. Underdamped $R$ makes $\gamma_\ell$ oscillate while decaying; overdamped $R$ makes it decay more monotonically. Stability $\rho(R)&lt;1$ is exactly the statement that $\gamma_\ell\to 0$ as $\ell\to\infty$ — old kicks are eventually forgotten.</p>
-
-        <p><strong>3. Take expectation of the square (i.i.d. model).</strong> Assume the noises $(\epsilon_i^{j})_{j\ge 0}$ are i.i.d., mean zero, variance $\sigma^2$, and independent of the initialization. Then the cross term between the deterministic piece and the noise sum has expectation zero, and distinct kicks do not correlate:
-        $$
-        \mathbf{E}\Bigl[\Bigl(\sum_{j=0}^{k-1}\epsilon_i^{j}\gamma_{k-1-j}\Bigr)^2\Bigr]
-        =
-        \sum_{j=0}^{k-1}\mathbf{E}[(\epsilon_i^{j})^2]\,\gamma_{k-1-j}^2
-        =
-        \sigma^2\sum_{j=0}^{k-1}\gamma_{k-1-j}^2
-        =
-        \sigma^2\sum_{\ell=0}^{k-1}\gamma_\ell^2.
-        $$
-        Therefore
-        $$
-        \mathbf{E}[(x_i^k)^2]
-        =
-        \underbrace{\bigl(e_2^\top R^k s_i^0\bigr)^2}_{\text{deterministic / transient}}
-        +
-        \underbrace{\sigma^2\sum_{\ell=0}^{k-1}\bigl(e_2^\top R^\ell v\bigr)^2}_{\text{stochastic / accumulated}}.
-        $$
-        That second sum is the “weighted sum of past variances”: every past kick contributes variance $\sigma^2$, weighted by how strongly that kick still affects position today ($\gamma_\ell^2$).</p>
-
-        <p><strong>4. Why this is a “decaying sum of kicks.”</strong> If the momentum parameters are stable, the spectral radius satisfies $\rho(R)&lt;1$, so $\|R^\ell\|$ decays (roughly like $\rho^\ell$, up to constants / oscillation). Hence $|\gamma_\ell|=|e_2^\top R^\ell v|$ decays as $\ell$ grows: old noise is forgotten. The infinite-horizon floor of the stochastic term is the convergent series
-        $$
-        \sigma^2\sum_{\ell=0}^{\infty}\gamma_\ell^2&lt;\infty,
-        $$
-        which is the steady noise floor after the transient $R^k s_i^0$ has died. So spiritually Distill is right that you see a decaying memory of past errors — but the right object is $\sum_\ell\gamma_\ell^2$, not $\epsilon^k\sum R^{k-j}v$.</p>
-
-        <p><strong>5. Where Distill’s algebra goes wrong vs what they intended.</strong> Their display factors one $\epsilon_i^k$ outside $\sum R^{k-j}v$. That would describe a path in which the <em>same</em> noise value is re-injected every step. For expectations of squares with fresh i.i.d. noise, you instead expand the square of a sum of different $\epsilon^{j}$ and keep only the diagonal terms, which produces $\sigma^2\sum\gamma_\ell^2$. Same cartoon (“noise filtered by powers of $R$”), different algebra.</p>
-
-        <p><strong>6. Why large $\beta$ can compound noise.</strong> The matrix $R$ depends on $\beta$. Larger momentum typically makes $\rho(R)$ closer to $1$ in underdamped regimes, so $|\gamma_\ell|$ decays more slowly. Then more past kicks still contribute to $\sum\gamma_\ell^2$, and the noise floor rises. That is the tradeoff Distill flags: momentum helps the deterministic transient (first term dies like $\rho^{2k}$), but can worsen the stochastic floor (second term’s sum gets larger). Smaller $\alpha$ shrinks $v$’s effect and often shrinks $\gamma_\ell$, which helps the noise term, but slows deterministic progress. Hence the “unfortunate tradeoffs” between transient speed and steady-state variance.</p>
-
-        <p class="callout">One-sentence version: SGD noise is a stream of impulses into the $(y,x)$ linear system; $\mathbf{E}[(x^k)^2]$’s random part is $\sigma^2$ times the energy of the position impulse response $\sum_\ell|e_2^\top R^\ell v|^2$, not a single $\epsilon^k$ times one summed vector.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Clean rewrite of Distill’s $\mathbf{E}f(x^k)$ appendix <span class="tag">fix</span></summary>
-      <div class="body">
-        <p>Distill’s footnote mixes indices, drops a square, and writes $\mathbf{E}[\epsilon^k]$ where a variance belongs. Here is the same calculation with one fixed notation.</p>
-
-        <p><strong>Symbols (one mode, drop the $i$).</strong></p>
-        <ul>
-          <li>$f(x)=\tfrac12\lambda x^2$ — 1D quadratic for this eigenmode.</li>
-          <li>$s^t=\begin{pmatrix}y^t\\ x^t\end{pmatrix}$ — velocity / position at step $t$.</li>
-          <li>$R$ — $2\times 2$ momentum map for this mode (depends on $\alpha,\beta,\lambda$).</li>
-          <li>$v=\begin{pmatrix}1\\-\alpha\end{pmatrix}$ — how one unit of gradient noise enters $(y,x)$.</li>
-          <li>$e_2=\begin{pmatrix}0\\1\end{pmatrix}$ — picks out position: $x^t=e_2^\top s^t$.</li>
-          <li>$\varepsilon^0,\varepsilon^1,\ldots$ — i.i.d. gradient noises, $\mathbf{E}[\varepsilon^t]=0$, $\mathbf{E}[(\varepsilon^t)^2]=\sigma^2$. <em>Different</em> $t$ ⇒ <em>different</em> random variable.</li>
-          <li>$\gamma_\ell:=e_2^\top R^\ell v$ — position impulse response after $\ell$ steps.</li>
-        </ul>
-
-        <p><strong>Correct state at step $k$.</strong>
-        $$
-        s^k
-        =
-        R^k s^0
-        +
-        \sum_{t=0}^{k-1}\varepsilon^{t}\,R^{k-1-t}v.
-        $$
-        Position:
-        $$
-        x^k
-        =
-        e_2^\top R^k s^0
-        +
-        \sum_{t=0}^{k-1}\varepsilon^{t}\,\gamma_{k-1-t}.
-        $$
-        Write $a:=e_2^\top R^k s^0$ for the deterministic piece (non-random if $s^0$ is fixed), and
-        $$
-        \xi^k:=\sum_{t=0}^{k-1}\varepsilon^{t}\,\gamma_{k-1-t}
-        $$
-        for the noise-driven piece. Then $x^k=a+\xi^k$.</p>
-
-        <p><strong>Expected loss.</strong>
-        $$
-        \mathbf{E}\,f(x^k)
-        =
-        \frac{\lambda}{2}\,\mathbf{E}[(x^k)^2]
-        =
-        \frac{\lambda}{2}\,\mathbf{E}\bigl[(a+\xi^k)^2\bigr].
-        $$
-        Expand: $\mathbf{E}[(a+\xi^k)^2]=a^2+2a\mathbf{E}[\xi^k]+\mathbf{E}[(\xi^k)^2]$. Mean-zero noise ⇒ $\mathbf{E}[\xi^k]=0$, so
-        $$
-        \mathbf{E}\,f(x^k)
-        =
-        \underbrace{\frac{\lambda}{2}\,a^2}_{\text{deterministic / transient}}
-        +
-        \underbrace{\frac{\lambda}{2}\,\mathbf{E}[(\xi^k)^2]}_{\text{stochastic / noise floor}}.
-        $$
-        (Distill’s writeup drops the square on $a$ — that is a typo.)</p>
-
-        <p><strong>Variance of the noise sum.</strong> Because the $\varepsilon^{t}$ are uncorrelated and mean zero,
-        $$
-        \mathbf{E}[(\xi^k)^2]
-        =
-        \mathbf{E}\Bigl[\Bigl(\sum_{t=0}^{k-1}\varepsilon^{t}\gamma_{k-1-t}\Bigr)^2\Bigr]
-        =
-        \sum_{t=0}^{k-1}\mathbf{E}[(\varepsilon^{t})^2]\,\gamma_{k-1-t}^2
-        =
-        \sigma^2\sum_{t=0}^{k-1}\gamma_{k-1-t}^2
-        =
-        \sigma^2\sum_{\ell=0}^{k-1}\gamma_\ell^2.
-        $$
-        Cross terms $\mathbf{E}[\varepsilon^{t}\varepsilon^{t'}]$ for $t\neq t'$ vanish (“uncorrelated”). What multiplies the sum of $\gamma^2$ is the <strong>second moment</strong> $\sigma^2=\mathbf{E}[(\varepsilon^{t})^2]$, not $\mathbf{E}[\varepsilon^{t}]$ (which is $0$ and would wipe out the whole stochastic term).</p>
-
-        <p><strong>Final clean formula.</strong>
-        $$
-        \boxed{
-        \mathbf{E}\,f(x^k)
-        =
-        \frac{\lambda}{2}\bigl(e_2^\top R^k s^0\bigr)^2
-        +
-        \frac{\lambda\sigma^2}{2}\sum_{\ell=0}^{k-1}\bigl(e_2^\top R^\ell v\bigr)^2
-        }
-        $$
-        with $v=(1,-\alpha)^\top$.</p>
-
-        <p><strong>Map from Distill’s muddled lines → this.</strong></p>
-        <ul>
-          <li>Their $\epsilon^k\sum_i R^{k-i}v$ → our $\sum_t\varepsilon^{t}R^{k-1-t}v$ (noise <em>inside</em> the sum, indexed by injection time $t$).</li>
-          <li>Their missing $(\cdots)^2$ on the $R^k$ term → our $a^2$.</li>
-          <li>Their $\mathbf{E}[\epsilon^k]\cdot\sum\gamma_i^2$ → our $\sigma^2\sum\gamma_\ell^2$.</li>
-          <li>Their “third step uses $\mathbf{E}\epsilon=0$” → that kills the cross term $2a\mathbf{E}[\xi]$, not the variance term.</li>
-          <li>Their “uncorrelated” → kills cross terms among different $t$ when expanding $\mathbf{E}[(\xi^k)^2]$.</li>
-        </ul>
-      </div>
-    </details>
-  </main>
+  <article>
+    <p class="nav"><a href="notes.html">Appendix: Distill math notes →</a></p>
+    <p class="label">Thesis · Brainlift · Pretraining Optimization</p>
+    <h1>Geometry Before Stepsize</h1>
+    <p class="subtitle">Pretraining optimization for curriculum-shaped eduLLMs</p>
+    <p class="meta">
+      <strong>Katie He</strong> · Owners: Katie He<br />
+      Theory appendix: <a href="notes.html">Why Momentum Works — clickable math notes</a>
+    </p>
+
+    <h2>Thesis</h2>
+    <p>The ideal pretraining system for Incept’s ~1B eduLLM should <strong>not</strong> treat AdamW + cosine as a settled default borrowed from web-scale crawls. Those recipes assume a messy, high-entropy data geometry. We are deliberately building the opposite: a <strong>curriculum-shaped</strong> corpus (textbooks, worked examples, skill-DAG orderings) whose purpose is to change <em>what</em> the model sees—and therefore <em>which directions in parameter space are hard</em>.</p>
+    <p>My central bet:</p>
+    <blockquote class="claim">
+      First-order methods are already near-optimal on a fixed loss geometry. The eduLLM win is to change that geometry—then only secondarily pick the optimizer that exploits it.
+    </blockquote>
+    <p>I call this stance <strong>κ-first pretraining</strong>: treat effective condition number / update geometry as a first-class design object, not a hyperparameter afterthought. Distill’s momentum analysis is the mathematical spine of that claim&nbsp;[1]. The frontier stack—AdamW, μP, Schedule-Free, Muon—is the map of <em>how people change geometry in practice</em>&nbsp;[2]–[6]. The Incept constraint—learning gain per token and mastery per dollar on a shared 1B testbed—is what makes the claim falsifiable rather than aesthetic.</p>
+
+    <p class="pull">Change $\kappa$ before you tune $\alpha$.</p>
+
+    <h2>Bottleneck</h2>
+    <p>On a quadratic with condition number $\kappa=\lambda_{\max}/\lambda_{\min}$, optimally tuned gradient descent contracts errors like</p>
+    $$
+    \rho_{\mathrm{GD}} \approx \frac{\kappa-1}{\kappa+1},
+    $$
+    <p>while optimally tuned momentum contracts like</p>
+    $$
+    \rho_{\mathrm{HB}} \approx \frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}.
+    $$
+    <p>For large $\kappa$, GD needs $\Theta(\kappa\log(1/\varepsilon))$ steps; momentum needs $\Theta(\sqrt{\kappa}\log(1/\varepsilon))$. That $\sqrt{\kappa}$ speedup is real—and Distill shows it is also essentially <strong>tight</strong> for linear first-order methods on worst-case smooth strongly convex problems&nbsp;[1]. The escape hatch in the same article is the one that matters for us:</p>
+    <p>You cannot invent a cleverer combination of past gradients to beat the lower bound on a <em>fixed</em> hard $f$. You <em>can</em> reformulate so $\kappa$ itself changes.</p>
+    <p>For a sovereign eduLLM, FLOPs are scarce and tokens are curated. The bottleneck is not “find a slightly better $\beta$.” It is: <strong>every token of Skill-DAG / worked-example / QA-augmented data is an intervention on the spectrum of the training problem.</strong> Optimizer research that ignores that is optimizing the wrong object.</p>
+    <p>Operationally, every pretraining report should quote two currencies the program already demands:</p>
+    <ol>
+      <li><strong>Learning gain per token</strong> (eval harness, with CIs).</li>
+      <li><strong>Mastery per dollar</strong> (same gains divided by H100-hours × price).</li>
+    </ol>
+    <p>An optimizer “win” that does not move those numbers is not a win.</p>
+
+    <h2>Mechanism: κ-first pretraining</h2>
+    <p>Pipeline I want measured on the shared testbed:</p>
+    $$
+    \text{corpus geometry}
+    \;\rightarrow\;
+    \text{parametrization ($\mu$P)}
+    \;\rightarrow\;
+    \text{update geometry (AdamW / Muon / Schedule-Free)}
+    \;\rightarrow\;
+    \text{schedule / budget}
+    \;\rightarrow\;
+    \text{harness multipliers}.
+    $$
+
+    <h3>Layer A — Data as spectral design (P1 coupling)</h3>
+    <p>Curriculum levers (QA augmentation, worked examples, skill-DAG order, RHO-1-style selection) are usually sold as pedagogy in the corpus. κ-first reframes them as <strong>mode schedulers</strong>:</p>
+    <ul>
+      <li>In the eigenbasis of a quadratic, each mode $i$ evolves independently: $x_i^{k+1}=(1-\alpha\lambda_i)x_i^k$&nbsp;[1].</li>
+      <li>Large-$\lambda$ modes fit fast and are robust; small-$\lambda$ modes are slow and noise-sensitive.</li>
+      <li>Early stopping ≈ Tikhonov: you leave small modes underfit on purpose.</li>
+    </ul>
+    <p>A skill-ordered textbook corpus is a hypothesis that we can <strong>front-load informative, well-conditioned updates</strong> (schema / procedure modes) and defer or externalize brittle fact modes (the P3 memory-split bet). That is Distill’s soft-vs-stiff language applied to educational data design.</p>
+
+    <h3>Layer B — Parametrization before optimizer (μP)</h3>
+    <p>Maximal Update Parametrization&nbsp;[4] is the cleanest industrial instance of “change geometry before you tune stepsizes”: transfer learning rates from a small model to a large one because the <em>update scale</em> was designed to be width-stable. For a 1B testbed that will later jump to production width, μP is how we stop confusing “AdamW is unstable” with “we scaled LR wrong.”</p>
+
+    <h3>Layer C — Update geometry (frontier map)</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>What it changes</th><th>EduLLM measurement</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SGD + momentum</strong></td>
+          <td>Second-order lag; $\sqrt{\kappa}$ on nice quadratics</td>
+          <td>Classical geometry baseline&nbsp;[1],&nbsp;[7]</td>
+        </tr>
+        <tr>
+          <td><strong>Adam / AdamW</strong></td>
+          <td>Diagonal preconditioning + decoupled decay</td>
+          <td>Null hypothesis on <em>our</em> corpus&nbsp;[2],&nbsp;[3]</td>
+        </tr>
+        <tr>
+          <td><strong>Schedule-Free</strong></td>
+          <td>Replace LR schedule with iterate averaging</td>
+          <td>Does removing schedule cut tuning tax at 1B?&nbsp;[5]</td>
+        </tr>
+        <tr>
+          <td><strong>Muon</strong></td>
+          <td>Orthogonalized / spectral momentum updates</td>
+          <td>Does geometry change buy tokens-to-target?&nbsp;[6]</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>I have <strong>deep-read</strong> Distill&nbsp;[1] end-to-end (full derivations in the companion notes). AdamW / μP / Schedule-Free / Muon are currently <strong>frontier-map reads</strong>: I know the claim each paper makes and the ablation that would kill it on our harness. That is intentional. The internship grades measured multipliers, not literature cosplay. The deep theory investment was chosen so that when we ablate Muon vs AdamW, I can say <em>what geometric hypothesis we are testing</em>, not only which WandB curve won.</p>
+
+    <h2>The Hard Part</h2>
+    <h3>1. Distill’s lower bound, stated cleanly</h3>
+    <p>Any method of the form</p>
+    $$
+    w^{k+1}=w^{0}+\sum_{i=0}^{k}\gamma_i^{k}\,\nabla f(w^{i})
+    $$
+    <p>only moves in the span of gradients seen so far. On Distill’s path (“Convex Rosenbrock”) $f^n$, information hops one edge per step. Starting at $0$, after $k$ steps coordinates $i\ge k+1$ are untouched, so</p>
+    $$
+    \|w^{k}-w^{\star}\|_{\infty}
+    \;\ge\;
+    q^{k}\,\|w^{0}-w^{\star}\|_{\infty},
+    \qquad
+    q=\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}.
+    $$
+    <p>As $n\to\infty$, $\kappa(f^n)\to\kappa$, and this lower bound meets momentum’s upper bound. <strong>On that problem class, you cannot first-order your way past $q$.</strong></p>
+    <p>Spiritually: optimality of momentum is a warning against clever $\gamma$-hacking. It is not a stop sign for Muon, Fisher/natural gradient, or curriculum redesign—those leave the algorithm class or change $f$.</p>
+
+    <h3>2. Stochastic phase vs transient phase</h3>
+    <p>With gradient noise, the mode error splits as</p>
+    $$
+    \mathbf{E}\,f(x^{k})
+    =
+    \frac{\lambda}{2}\bigl(e_2^{\top}R^{k}s^{0}\bigr)^{2}
+    +
+    \frac{\lambda\sigma^{2}}{2}\sum_{\ell=0}^{k-1}\bigl(e_2^{\top}R^{\ell}v\bigr)^{2},
+    $$
+    <p>deterministic transient plus a noise floor filtered by the impulse response of $R$&nbsp;[1]. Distill + Sutskever et al.&nbsp;[7] emphasize that in deep learning the <strong>transient</strong> often matters more than the fine-tuning noise floor. For Incept’s token budgets, that is decisive: we should optimize for <em>fast useful progress on schema-heavy evals</em>, not for asymptotic stationary variance on an infinite crawl.</p>
+
+    <h3>3. What I am still unsure about</h3>
+    <p>Whether textbook/skill-DAG data <em>actually</em> improves effective conditioning in a way Muon can exploit—or whether the gains are purely from better targets (facts in QA form) with AdamW already saturating the geometry. That is empirical. κ-first says we should <strong>instrument</strong> for it (proxy sharpness, update-size histograms, tokens-to-harness-threshold), not assume it.</p>
+
+    <h2>DOK 4 — Spiky Points of View</h2>
+
+    <div class="spov">
+      <strong class="claim-line">SPOV 1 — Geometry is the product; the optimizer is packaging</strong>
+      <p><strong>Claim.</strong> For curriculum-shaped eduLLM pretraining, the highest-leverage “optimization” work is changing effective $\kappa$ (data order, mixture, parametrization, update metric)—not inventing a new adaptive $\varepsilon$.</p>
+      <p><strong>Why spiky.</strong> Most LLM lore starts from AdamW and debates schedules. Distill’s closure says first-order methods are already tight <em>given</em> $f$. Incept’s P1 thesis says we are rewriting $f$ on purpose. Those two sentences force a reordering of the research stack.</p>
+      <p><strong>Implication.</strong> Every optimizer ablation must be paired with a corpus-geometry ablation. Muon-on-DCLM-shuffle answers a different question than Muon-on-Skill-DAG-textbooks.</p>
+    </div>
+
+    <div class="spov">
+      <strong class="claim-line">SPOV 2 — Transient &gt; asymptote under sovereign token budgets</strong>
+      <p><strong>Claim.</strong> On the 1B testbed, select optimizers/schedules by tokens-to-target on educational evals in the early and middle training regime, even if asymptotic train loss looks worse.</p>
+      <p><strong>Why.</strong> Noise-floor theory and infinite-horizon schedules are written for regimes we are not buying. Learning science cares when schemas stabilize, not whether epoch 200 is $10^{-4}$ lower.</p>
+    </div>
+
+    <div class="spov">
+      <strong class="claim-line">SPOV 3 — Learning-science sequencing is a spectral intervention</strong>
+      <p><strong>Claim.</strong> Skill-DAG / worked-example / QA ordering should be analyzed as shaping which eigenmodes receive gradient mass early—not only as “teaching the model like a student.”</p>
+      <p><strong>Why.</strong> Distill’s colorization / path examples show locality and connectivity control conditioning. A prerequisite graph in the corpus is connectivity design on concepts. This bridges cognitive science (P1) into optimization theory without pretending Sweller invented AdamW.</p>
+    </div>
+
+    <div class="spov">
+      <strong class="claim-line">SPOV 4 — AdamW remains the null; Muon must buy a multiplier</strong>
+      <p><strong>Claim.</strong> AdamW&nbsp;[2],&nbsp;[3] is the correct null hypothesis for Incept pretraining. Muon&nbsp;[6] and Schedule-Free&nbsp;[5] are licensed only as measured alternatives: tokens-to-harness and \$/mastery with CIs. “Paper said 2×” is not a deliverable.</p>
+      <p><strong>Why.</strong> The program’s prime directive is the race car. Frontier papers are proposals for which car to put on the track.</p>
+    </div>
+
+    <h2>DOK 3 — Insights</h2>
+    <ol>
+      <li><strong>Independence in the eigenbasis</strong> is why momentum theory works at all. Once $A=Q\Lambda Q^{\top}$, GD and heavy-ball decouple per mode&nbsp;[1]. Adaptive diagonal methods buy a cheap online version when $Q$ is unknown.</li>
+      <li><strong>AdamW’s real contribution</strong> is geometric + regularizer hygiene: decoupled weight decay&nbsp;[3] fixes how $L_2$ interacted with adaptive steps.</li>
+      <li><strong>μP is the width-wise cousin of κ-first</strong>&nbsp;[4]: stable update magnitudes across width prevent mistuning $\alpha$ when the 1B recipe promotes.</li>
+      <li><strong>Muon is Distill’s escape hatch with engineering attached</strong>&nbsp;[6]: a bet that Euclidean Adam steps fight the wrong metric. If true on our corpus, tokens-to-target moves; if false, we publish the null.</li>
+      <li><strong>Schedule-Free attacks tuning tax</strong>&nbsp;[5]: for hackathon-scale ablations, not knowing $T$ in advance may matter as much as wall-clock per step.</li>
+      <li><strong>Stochastic momentum compounds noise when $\beta$ is large</strong> because the impulse response $\gamma_\ell=e_2^{\top}R^{\ell}v$ decays slowly&nbsp;[1].</li>
+      <li><strong>Edge of Stability</strong>&nbsp;[8] warns classical $\kappa$ theory is incomplete for deep nets. I treat it as a limit on exporting Distill numbers literally into Transformers—not as a reason to discard spectral intuition.</li>
+    </ol>
+
+    <h2>Evidence</h2>
+    <table>
+      <thead>
+        <tr><th>Hypothesis</th><th>Kill shot on the 1B harness</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Skill-DAG changes useful geometry</td><td>Same optimizer; ordered vs shuffled; tokens-to-mastery CI excludes 1.0</td></tr>
+        <tr><td>μP transfers</td><td>LR tuned at small width; zero-shot to 1B beats retuned AdamW</td></tr>
+        <tr><td>Muon &gt; AdamW on our data</td><td>Matched tokens; wins learning-gain/token <em>and</em> \$/mastery</td></tr>
+        <tr><td>Schedule-Free cuts tuning tax</td><td>Fewer LR sweeps to same eval threshold</td></tr>
+        <tr><td>Transient-focused early stop</td><td>Stop by harness plateau; train loss may be worse, eval not</td></tr>
+      </tbody>
+    </table>
+    <p>Deep evidence I already trust for the geometry story: Distill&nbsp;[1] and classical momentum transfer&nbsp;[7]. Frontier optimizer headline numbers are <strong>priors</strong>, not Incept measurements.</p>
+
+    <h2>SLMs / Why this matters at ~1B</h2>
+    <p>At 1B parameters and thousands of H100-hours, you cannot brute-force past a bad geometry. Chinchilla-optimal token counts&nbsp;[9] still assume you spend tokens well; P1 says many internet tokens are the wrong tokens. κ-first pretraining keeps optimization specialization loyal to the eduLLM thesis: maximize <strong>schooling utility per dollar</strong>, not WikiText against a 405B.</p>
+
+    <h2>Experts</h2>
+    <ul>
+      <li><strong>Gabriel Goh</strong> — momentum geometry; mathematical spine of κ-first&nbsp;[1]</li>
+      <li><strong>Sutskever et al.</strong> — init + momentum; transient-phase emphasis&nbsp;[7]</li>
+      <li><strong>Loshchilov &amp; Hutter</strong> — AdamW, SGDR; null optimizer + schedule&nbsp;[3],&nbsp;[10]</li>
+      <li><strong>Greg Yang et al.</strong> — μP / Tensor Programs; width-stable geometry&nbsp;[4]</li>
+      <li><strong>Defazio et al.</strong> — Schedule-Free; tuning-tax attack&nbsp;[5]</li>
+      <li><strong>Moonshot / Muon lineage</strong> — orthogonalized momentum; geometry frontier&nbsp;[6]</li>
+      <li><strong>Cohen et al.</strong> — Edge of Stability; limits of classical LR theory&nbsp;[8]</li>
+    </ul>
+
+    <h2>Next experiments</h2>
+    <ol>
+      <li>Reproduce a nanoGPT-scale AdamW baseline on the shared corpus; freeze as null.</li>
+      <li>Ablate shuffle vs skill-DAG under identical AdamW (geometry via data only).</li>
+      <li>Port μP hyperparameters from a width proxy before any Muon work.</li>
+      <li>Muon vs AdamW only after (2)–(3), so a win is interpretable.</li>
+      <li>Keep Distill notes public as the theory appendix.</li>
+    </ol>
+    <p><strong>Invariant for every run:</strong> optimizer name, corpus geometry tag, parametrization tag, tokens consumed, harness scores with CIs, \$ estimate. No orphan WandB curves.</p>
+
+    <h2>Scope</h2>
+    <p><strong>In scope.</strong> Pretraining optimization for the eduLLM: momentum theory, AdamW null, μP, schedules / Schedule-Free, Muon-class geometry, coupling to curriculum data design, measurement on the 1B testbed.</p>
+    <p><strong>Out of scope.</strong> Post-training (SFT/DPO/RLHF) except as a downstream consumer of the checkpoint; tokenizer design (P2); memory-split architecture details (P3) except as a geometry hypothesis; building RAG systems.</p>
+
+    <h2>References</h2>
+    <ol class="refs">
+      <li>G. Goh, “Why Momentum Really Works,” <em>Distill</em>, 2017. <a href="https://distill.pub/2017/momentum/">distill.pub/2017/momentum</a></li>
+      <li>D. P. Kingma and J. Ba, “Adam: A Method for Stochastic Optimization,” ICLR, 2015. arXiv:1412.6980</li>
+      <li>I. Loshchilov and F. Hutter, “Decoupled Weight Decay Regularization,” ICLR, 2019. arXiv:1711.05101</li>
+      <li>G. Yang et al., “Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer,” 2022. arXiv:2203.03466</li>
+      <li>A. Defazio et al., “The Road Less Scheduled,” NeurIPS, 2024. arXiv:2405.15682</li>
+      <li>J. Liu et al., “Muon is Scalable for LLM Training,” 2025. arXiv:2502.16982</li>
+      <li>I. Sutskever, J. Martens, G. Dahl, and G. Hinton, “On the Importance of Initialization and Momentum in Deep Learning,” ICML, 2013</li>
+      <li>J. Cohen et al., “Gradient Descent on Neural Networks Typically Occurs at the Edge of Stability,” ICLR, 2021. arXiv:2103.00065</li>
+      <li>J. Hoffmann et al., “Training Compute-Optimal Large Language Models,” NeurIPS, 2022. arXiv:2203.15556</li>
+      <li>I. Loshchilov and F. Hutter, “SGDR: Stochastic Gradient Descent with Warm Restarts,” ICLR, 2017. arXiv:1608.03983</li>
+    </ol>
+  </article>
 </body>
 </html>
