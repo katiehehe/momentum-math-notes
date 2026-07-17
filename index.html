@@ -15,216 +15,162 @@
     });"></script>
   <style>
     :root {
-      --bg: #f6f3ee;
-      --ink: #1a1816;
-      --muted: #5a554e;
-      --line: #ddd5c8;
-      --accent: #0f5f59;
-      --card: #fffcf8;
+      --bg: #f7f4ef;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e0d5;
+      --accent: #0f766e;
+      --card: #fffdf9;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Source Serif 4", "Iowan Old Style", Palatino, Georgia, serif;
-      background: linear-gradient(180deg, #e7f1ef 0%, transparent 32%), var(--bg);
+      font-family: "Iowan Old Style", Palatino, Georgia, serif;
+      background: radial-gradient(900px 420px at 10% -10%, #ddf3ef 0%, transparent 55%), var(--bg);
       color: var(--ink);
-      line-height: 1.65;
+      line-height: 1.6;
       font-size: 1.05rem;
     }
-    article {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 3rem 1.35rem 4.75rem;
-    }
-    h1 {
-      font-size: 1.9rem;
-      letter-spacing: -0.025em;
-      margin: 0 0 0.6rem;
-      line-height: 1.2;
-    }
+    article { max-width: 720px; margin: 0 auto; padding: 2.75rem 1.35rem 4.5rem; }
+    h1 { font-size: 1.8rem; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
     h2 {
       font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
       color: var(--accent);
-      margin: 2.5rem 0 0.9rem;
+      margin: 2.25rem 0 0.75rem;
     }
-    h3 {
-      font-size: 1.05rem;
-      margin: 1.25rem 0 0.45rem;
-      font-weight: 650;
-    }
+    h3 { font-size: 1.05rem; margin: 1.35rem 0 0.4rem; }
     .meta {
       color: var(--muted);
-      margin: 0 0 1.75rem;
-      padding-bottom: 1.1rem;
-      border-bottom: 1px solid var(--line);
       font-family: ui-sans-serif, system-ui, sans-serif;
       font-size: 0.9rem;
+      margin: 0 0 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
     }
     .meta a { color: var(--accent); }
-    p { margin: 0.85rem 0; }
-    ul, ol { margin: 0.5rem 0 0.85rem 1.2rem; padding: 0; }
-    li { margin: 0.35rem 0; }
-    .spov {
+    p { margin: 0.75rem 0; }
+    ul { margin: 0.4rem 0 0.8rem 1.2rem; padding: 0; }
+    li { margin: 0.3rem 0; }
+    .source {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 1.05rem 1.2rem;
+      padding: 1rem 1.15rem;
       margin: 1rem 0;
     }
-    .spov h3 { margin-top: 0; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      margin: 1rem 0 1.2rem;
+    .status {
       font-family: ui-sans-serif, system-ui, sans-serif;
-    }
-    th, td {
-      border-top: 1px solid var(--line);
-      padding: 0.55rem 0.4rem;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: var(--muted);
     }
-    .katex-display {
-      margin: 1.05rem 0;
-      overflow: visible;
-      font-size: 1.02em;
-    }
+    .tbd { color: var(--muted); font-style: italic; }
+    .katex-display { margin: 0.9rem 0; overflow: visible; }
     .katex-display > .katex { white-space: normal; }
-    .refs {
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.86rem;
-      color: var(--muted);
-    }
-    .refs a { color: var(--accent); }
+    a { color: var(--accent); }
   </style>
 </head>
 <body>
   <article>
     <h1>Pretraining Optimization Brainlift</h1>
     <p class="meta">
-      <strong>Katie He</strong><br />
-      Theory appendix: <a href="notes.html">Why Momentum Works — derivations</a>
+      <strong>Owners:</strong> Katie He<br />
+      Distill notes: <a href="notes.html">math appendix</a>
     </p>
 
     <h2>Purpose</h2>
-    <p>This BrainLift develops a working thesis on <strong>pretraining optimization for Incept’s eduLLM</strong>: why classical momentum theory constrains first-order methods, where AdamW sits as the practical baseline, and how frontier methods (μP, Schedule-Free, Muon) should be interpreted as interventions on update geometry rather than as drop-in folklore.</p>
-    <p>The goal is to recommend a measurable pretraining stack for the shared ~1B testbed — one that fits curriculum-shaped data and is judged by learning gain per token and mastery per dollar.</p>
-    <p><strong>In scope.</strong> First-order / momentum theory (primary source: Distill [1], read in full). AdamW as null. Frontier map for μP, Schedule-Free, and Muon with falsification criteria. Coupling between curriculum data design (P1) and optimization geometry. Experiment plan on the 1B testbed.</p>
-    <p><strong>Out of scope.</strong> Post-training, except as a downstream consumer of the checkpoint. Tokenizer design (P2). Full memory-split architecture (P3), except as a related capacity/geometry hypothesis. Exhaustive review of every optimizer variant.</p>
+    <p>To understand the mechanisms of pretraining optimization and scope out what the frontier methods are. This includes AdamW, Muon, and MoE. This information should directly inform what type of training we conduct for the final eduLLM.</p>
 
-    <h2>DOK4 — Spiky Points of View</h2>
+    <h2>Out of scope</h2>
+    <p>Anything outside of pretraining optimization.</p>
 
-    <div class="spov">
-      <h3>SPOV 1 — Geometry is the primary optimization lever for curriculum-shaped eduLLM pretraining.</h3>
-      <p>On a fixed smooth strongly convex problem, optimally tuned momentum is essentially tight among linear first-order methods: Distill’s path construction matches the $(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$ rate from above and below [1]. The constructive implication is not that momentum research is finished, but that further gains require changing problem geometry — condition number, parametrization, or update metric. Incept is already attempting that change on the data side (textbooks, skill graphs, worked examples). Pretraining optimization should therefore be framed as <strong>κ-first design</strong>: shape effective geometry, then select the optimizer that exploits it. Hyperparameter defaults built for shuffled web-crawl landscapes are the wrong starting point.</p>
-    </div>
-
-    <div class="spov">
-      <h3>SPOV 2 — Optimizer choice should be conditional on the educational objective, not on generic LM perplexity norms.</h3>
-      <p>An eduLLM is trained to support teaching under a constrained budget. That objective changes which training regimes matter: schema acquisition, transfer, and tokens-to-harness-threshold dominate asymptotic train loss on an infinite crawl. Learning-science sequencing is therefore not only a data-quality intervention. In Distill’s eigenmode language, ordering and connectivity affect which modes receive gradient mass early. Skill-DAG structure, worked examples, and QA augmentation should be treated as candidate spectral interventions and measured against shuffled controls under a fixed optimizer.</p>
-    </div>
-
-    <div class="spov">
-      <h3>SPOV 3 — AdamW remains the null hypothesis. Frontier optimizers must purchase a harness multiplier.</h3>
-      <p>AdamW [2][3] is the correct baseline for LLM pretraining. Muon [6], Schedule-Free [5], and related methods are admissible only as measured alternatives on the shared testbed: learning gain per token and mastery per dollar, with confidence intervals. Published speedups are priors. They are not deliverables.</p>
-    </div>
-
-    <div class="spov">
-      <h3>SPOV 4 — Under sovereign token budgets, transient progress dominates asymptotic noise-floor optimality.</h3>
-      <p>Distill’s stochastic analysis and the classical momentum literature [1][7] emphasize that deep learning often lives in a transient regime where noise can regularize, while large momentum can also retain noise through a slowly decaying impulse response. For limited-token educational pretraining, selection criteria should prioritize tokens-to-target on educational evaluations over late-stage training-loss polish.</p>
-    </div>
+    <h2>DOK4 — SPOVs</h2>
+    <p><strong>SPOV 1:</strong> The pretraining method should be heavily adapted to the type of learning the model needs to do. Since it will be absorbing knowledge from textbooks / curriculum-shaped data, we should not default to a generic web-crawl AdamW recipe without asking what geometry that data creates.</p>
+    <p><strong>SPOV 2:</strong> The loss function and frontier training method should heavily depend on the fact that we are training an eduLLM. Priority is a model that teaches students well under budget, not generic perplexity. Learning-science techniques (skill order, worked examples, QA form) belong in the pretraining conversation, not only in post-training or UX.</p>
+    <p class="tbd">SPOV 3 / 4 — draft later.</p>
 
     <h2>DOK3 — Insights</h2>
-    <ol>
-      <li>In the eigenbasis of a convex quadratic, gradient descent decouples across modes, $x_i^{k+1}=(1-\alpha\lambda_i)x_i^k$. Pathological curvature is the spread of those $\lambda_i$ (condition number $\kappa$).</li>
-      <li>Momentum lifts each mode to a two-dimensional linear system. Optimal $(\alpha,\beta)$ equalizes behavior at $\lambda_{\min}$ and $\lambda_{\max}$. Ill-conditioned problems push $\beta$ toward 1.</li>
-      <li>Distill’s path lower bound shows that no method of the form $w^{k+1}=w^0+\sum\gamma_i^k\nabla f(w^i)$ can asymptotically beat momentum’s rate on that family as $n\to\infty$. Practical reading: coefficient cleverness will not repair a bad geometry.</li>
-      <li>Early stopping under GD is qualitatively Tikhonov-like. Useful analogy for schema-versus-fact capacity allocation (adjacent to P3).</li>
-      <li>AdamW’s lasting contribution is geometric and regularizer hygiene — especially decoupled weight decay — not a new loss.</li>
-      <li>μP [4] is width-wise geometry control: stable update magnitudes make learning-rate transfer possible.</li>
-      <li>Muon [6] is Distill’s escape hatch made algorithmic: alter the update metric rather than remaining in Euclidean Adam geometry. A hypothesis to test on Incept data.</li>
-      <li>Schedule-Free [5] targets tuning cost (horizon / schedule dependence). On ablation-heavy budgets, that can matter as much as wall-clock per step.</li>
-      <li>Edge of Stability [8] limits literal export of classical $\kappa$ theory into deep nets. Spectral intuition remains a design language, not an exact Transformer rate calculator.</li>
-      <li>In the corrected stochastic unroll, large $\beta$ slows decay of the position impulse response, so momentum can improve conditioning while worsening noise retention.</li>
-    </ol>
-
-    <h2>Bottleneck mathematics</h2>
-    <p>GD versus momentum contraction factors:</p>
-    $$
-    \rho_{\mathrm{GD}}\approx\frac{\kappa-1}{\kappa+1},
-    \qquad
-    \rho_{\mathrm{HB}}\approx\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}.
-    $$
-    <p>First-order class and the information constraint motivating Distill’s lower bound:</p>
-    $$
-    w^{k+1}=w^{0}+\sum_{i}\gamma_i^{k}\,\nabla f(w^{i}).
-    $$
-    <p>Derivations, including the corrected stochastic expansion, are in the <a href="notes.html">theory appendix</a>.</p>
-
-    <h2>Experts</h2>
+    <p class="tbd">Draft together. Starters from Distill + open slots:</p>
     <ul>
-      <li><strong>Gabriel Goh [1]</strong> — momentum geometry and first-order lower bounds</li>
-      <li><strong>Sutskever et al. [7]</strong> — momentum in deep nets; transient-phase emphasis</li>
-      <li><strong>Loshchilov &amp; Hutter [3][10]</strong> — AdamW and schedule baselines</li>
-      <li><strong>Yang et al. [4]</strong> — μP / width-stable parametrization</li>
-      <li><strong>Defazio et al. [5]</strong> — Schedule-Free optimization</li>
-      <li><strong>Liu et al. / Muon line [6]</strong> — orthogonalized momentum at LLM scale</li>
-      <li><strong>Cohen et al. [8]</strong> — Edge of Stability</li>
+      <li>Training efficiency depends heavily on the loss landscape. There are ways to measure surface unevenness (e.g. condition number / eigenmodes) and ways to adjust for it (momentum, preconditioning, changing the problem).</li>
+      <li>If we consider weights and updates in the eigenbasis, the directions act independently under nice convex quadratic losses.</li>
+      <li>Introducing noise to gradient updates can act like a regularizer, but large momentum can also retain noise.</li>
+      <li class="tbd">[AdamW — insight TBD]</li>
+      <li class="tbd">[Muon — insight TBD]</li>
+      <li class="tbd">[MoE — insight TBD]</li>
     </ul>
 
-    <h2>DOK2 — Knowledge tree</h2>
-    <h3>1. Distill (completed deep read) [1]</h3>
-    <p><strong>Facts.</strong> Eigenbasis decoupling. $\kappa$ as pathological curvature. Momentum state $(y,x)$ with step matrix $R$. Optimal rate $(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$. Path objective $f^n$ with $w_i^\star=q^i$ and $\kappa(f^n)\to\kappa$. First-order span constraint. Stochastic impulse-response variance (Distill’s single-$\varepsilon^k$ display is incorrect — corrected in appendix). Explicit escape hatch: change $\kappa$.</p>
-    <p><strong>Summary.</strong> Distill explains both why momentum helps and why first-order methods stall on worst-case geometry. For eduLLM pretraining, the transferable conclusion is methodological: treat geometry (data, parametrization, update metric) as the design object, and treat AdamW-class methods as the measurement baseline.</p>
+    <h2>Sources</h2>
 
-    <h3>2. Frontier map</h3>
-    <table>
-      <thead>
-        <tr><th>Method</th><th>Claimed mechanism</th><th>Status</th><th>Falsification</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>AdamW</td><td>Diagonal preconditioning + decoupled decay</td><td>Null</td><td>—</td></tr>
-        <tr><td>μP</td><td>Width-stable updates ⇒ LR transfer</td><td>Mapped</td><td>Transfer fails vs retuned baseline</td></tr>
-        <tr><td>Schedule-Free</td><td>Reduce schedule / horizon dependence</td><td>Mapped</td><td>No tuning benefit or eval regression</td></tr>
-        <tr><td>Muon</td><td>Orthogonalized momentum improves geometry</td><td>Mapped</td><td>No tokens-to-target / \$/mastery gain</td></tr>
-        <tr><td>Curriculum × fixed opt</td><td>Data order changes useful geometry</td><td>To measure</td><td>Ordered ≈ shuffled under AdamW</td></tr>
-      </tbody>
-    </table>
-    <p><strong>Reading posture.</strong> Distill is the completed deep read. Frontier optimizer papers are tracked at claim and kill-shot resolution so ablations remain interpretable. Measured multipliers on the shared harness outrank secondary summaries.</p>
+    <div class="source">
+      <h3>Source 1 — Why Momentum Really Works (Distill)</h3>
+      <p><a href="https://distill.pub/2017/momentum/">distill.pub/2017/momentum</a> · <a href="notes.html">math notes</a><br />
+      <span class="status">Deep-read</span></p>
+      <p><strong>DOK1 — Facts</strong></p>
+      <ul>
+        <li>Pathological curvature: axes mismatched in curvature. Measured by $\kappa=\lambda_{\max}/\lambda_{\min}$.</li>
+        <li>On a convex quadratic, GD in the eigenbasis updates each mode independently: $x_i^{k+1}=(1-\alpha\lambda_i)x_i^k$.</li>
+        <li>Momentum uses a velocity state. Each mode becomes a 2D linear system. Optimal rate scales like $(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$.</li>
+        <li>First-order methods are linear combinations of past gradients. On Distill’s hard path, that implies a speed-of-light limit on information transfer.</li>
+        <li>As $n\to\infty$ on that path objective, $\kappa(f^n)$ approaches the design $\kappa$, and momentum’s upper bound meets the lower bound.</li>
+        <li>Escape hatch: reformulate to change $\kappa$ / geometry. Don’t only remix gradient coefficients.</li>
+      </ul>
+      <p><strong>DOK2 — Summary.</strong> Eigenbasis thinking makes GD/momentum clearer: modes decouple, $\kappa$ explains the pain, and momentum’s $\sqrt{\kappa}$ speedup is real but basically tight for linear first-order methods on that worst-case class. For eduLLM pretraining: cursed geometry will not be fixed by a cleverer first-order trick alone.</p>
+    </div>
 
-    <h2>Experiment plan</h2>
+    <div class="source">
+      <h3>Source 2 — AdamW</h3>
+      <p>Loshchilov &amp; Hutter, 2017. <a href="https://arxiv.org/abs/1711.05101">arXiv:1711.05101</a><br />
+      Related: Adam — <a href="https://arxiv.org/abs/1412.6980">arXiv:1412.6980</a><br />
+      <span class="status">To read / map · null baseline</span></p>
+      <p><strong>DOK1 — Facts</strong></p>
+      <ul>
+        <li class="tbd">(fill while reading)</li>
+        <li>Adam adapts stepsizes from first and second moments of gradients.</li>
+        <li>AdamW decouples weight decay from the adaptive gradient update.</li>
+        <li>AdamW is the default optimizer in most LLM pretraining recipes.</li>
+      </ul>
+      <p class="tbd"><strong>DOK2 — Summary.</strong> Draft together after reading.</p>
+    </div>
+
+    <div class="source">
+      <h3>Source 3 — Muon</h3>
+      <p>Liu et al., 2025. <a href="https://arxiv.org/abs/2502.16982">arXiv:2502.16982</a><br />
+      <span class="status">To read / map · frontier optimizer</span></p>
+      <p><strong>DOK1 — Facts</strong></p>
+      <ul>
+        <li class="tbd">(fill while reading)</li>
+        <li>Muon is an orthogonalized / spectral momentum-style optimizer aimed at LLM training efficiency.</li>
+        <li>Claimed compute-efficiency gains vs AdamW in the paper’s setting (prior until measured on our harness).</li>
+      </ul>
+      <p class="tbd"><strong>DOK2 — Summary.</strong> Draft together after reading.</p>
+    </div>
+
+    <div class="source">
+      <h3>Source 4 — MoE (Switch Transformers)</h3>
+      <p>Fedus, Zoph &amp; Shazeer, 2021. <a href="https://arxiv.org/abs/2101.03961">arXiv:2101.03961</a><br />
+      <span class="status">To read / map · pretraining scale / sparse compute</span></p>
+      <p><strong>DOK1 — Facts</strong></p>
+      <ul>
+        <li class="tbd">(fill while reading)</li>
+        <li>Mixture-of-Experts routes tokens to a subset of experts. Sparse activation ⇒ large parameter count without full dense FLOPs every step.</li>
+        <li>Rough compute intuition: dense ~$6PN$ vs MoE closer to activated-expert compute (routing/capacity dependent).</li>
+        <li>Relevant to pretraining because it changes the parameter–compute tradeoff, not only the optimizer.</li>
+      </ul>
+      <p class="tbd"><strong>DOK2 — Summary.</strong> Draft together after reading.</p>
+    </div>
+
+    <h2>Next</h2>
     <ol>
-      <li>Establish AdamW null on the shared corpus.</li>
-      <li>Hold optimizer fixed. Ablate shuffled versus skill-ordered / textbook-structured data.</li>
-      <li>Introduce μP from a width proxy before any Muon comparison.</li>
-      <li>Compare Muon versus AdamW only after steps 2–3.</li>
-      <li>Primary metric: tokens-to-harness-threshold and \$/mastery. Train loss secondary.</li>
-    </ol>
-    <p><strong>Run invariant.</strong> Record optimizer, corpus-geometry tag, parametrization tag, tokens, harness scores with CIs, and approximate dollar cost.</p>
-
-    <h2>References</h2>
-    <ol class="refs">
-      <li>G. Goh, “Why Momentum Really Works,” <em>Distill</em>, 2017. <a href="https://distill.pub/2017/momentum/">link</a></li>
-      <li>D. P. Kingma and J. Ba, “Adam: A Method for Stochastic Optimization,” arXiv:1412.6980</li>
-      <li>I. Loshchilov and F. Hutter, “Decoupled Weight Decay Regularization,” arXiv:1711.05101</li>
-      <li>G. Yang et al., “Tensor Programs V,” arXiv:2203.03466</li>
-      <li>A. Defazio et al., “The Road Less Scheduled,” arXiv:2405.15682</li>
-      <li>J. Liu et al., “Muon is Scalable for LLM Training,” arXiv:2502.16982</li>
-      <li>I. Sutskever et al., “On the Importance of Initialization and Momentum in Deep Learning,” ICML 2013</li>
-      <li>J. Cohen et al., “Edge of Stability,” arXiv:2103.00065</li>
-      <li>J. Hoffmann et al., “Training Compute-Optimal Large Language Models,” arXiv:2203.15556</li>
-      <li>I. Loshchilov and F. Hutter, “SGDR,” arXiv:1608.03983</li>
+      <li>Keep SPOVs 1–2. Draft SPOV 3+ after AdamW / Muon / MoE notes exist.</li>
+      <li>Fill DOK1 per source, then write DOK3 insights that combine them.</li>
+      <li>Decide what training choice “____” means concretely (optimizer vs MoE vs data geometry).</li>
     </ol>
   </article>
 </body>
