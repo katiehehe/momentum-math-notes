@@ -4,7 +4,9 @@ Clickable KaTeX notes walking through [Why Momentum Really Works](https://distil
 
 ## Live site
 
-After GitHub Pages is on: `https://katiehehe.github.io/momentum-math-notes/`
+**https://katiehehe.github.io/momentum-math-notes/**
+
+Repo: https://github.com/katiehehe/momentum-math-notes
 
 ## Pages
 
