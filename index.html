@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pretraining Optimization Brainlift — Katie He</title>
+  <title>pre-training brainlift</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -14,164 +14,272 @@
       ]
     });"></script>
   <style>
-    :root {
-      --bg: #f7f4ef;
-      --ink: #1c1917;
-      --muted: #57534e;
-      --line: #e7e0d5;
-      --accent: #0f766e;
-      --card: #fffdf9;
-    }
-    * { box-sizing: border-box; }
+    /* Notion-ish plain page */
     body {
       margin: 0;
-      font-family: "Iowan Old Style", Palatino, Georgia, serif;
-      background: radial-gradient(900px 420px at 10% -10%, #ddf3ef 0%, transparent 55%), var(--bg);
-      color: var(--ink);
-      line-height: 1.6;
-      font-size: 1.05rem;
+      background: #fff;
+      color: #37352f;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
     }
-    article { max-width: 720px; margin: 0 auto; padding: 2.75rem 1.35rem 4.5rem; }
-    h1 { font-size: 1.8rem; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
-    h2 {
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.75rem;
+    article {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 96px 120px;
+    }
+    @media (max-width: 800px) {
+      article { padding: 32px 20px 80px; }
+    }
+    h1 {
+      font-size: 2.2rem;
       font-weight: 700;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin: 2.25rem 0 0.75rem;
-    }
-    h3 { font-size: 1.05rem; margin: 1.35rem 0 0.4rem; }
-    .meta {
-      color: var(--muted);
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.9rem;
       margin: 0 0 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--line);
+      line-height: 1.2;
     }
-    .meta a { color: var(--accent); }
-    p { margin: 0.75rem 0; }
-    ul { margin: 0.4rem 0 0.8rem 1.2rem; padding: 0; }
-    li { margin: 0.3rem 0; }
-    .source {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 1rem 1.15rem;
-      margin: 1rem 0;
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 1.75rem 0 0.5rem;
     }
-    .status {
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.75rem;
-      color: var(--accent);
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+    p, li { margin: 0.35rem 0; }
+    ul { padding-left: 1.6rem; margin: 0.35rem 0 0.75rem; }
+    ol { padding-left: 1.6rem; margin: 0.35rem 0 0.75rem; }
+    a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+    strong { font-weight: 600; }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 0.5rem 0 0.15rem;
+      border-radius: 2px;
     }
-    .tbd { color: var(--muted); font-style: italic; }
-    .katex-display { margin: 0.9rem 0; overflow: visible; }
+    .caption {
+      color: #787774;
+      font-size: 0.9rem;
+      margin: 0 0 0.85rem;
+    }
+    .katex-display {
+      margin: 0.85rem 0;
+      overflow: visible;
+    }
     .katex-display > .katex { white-space: normal; }
-    a { color: var(--accent); }
+    .top {
+      color: #787774;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    .top a { color: #787774; }
   </style>
 </head>
 <body>
   <article>
-    <h1>Pretraining Optimization Brainlift</h1>
-    <p class="meta">
-      <strong>Owners:</strong> Katie He<br />
-      Distill notes: <a href="notes.html">math appendix</a>
-    </p>
+    <p class="top"><a href="notes.html">math notes appendix</a></p>
+    <h1>pre-training brainlift</h1>
 
-    <h2>Purpose</h2>
-    <p>To understand the mechanisms of pretraining optimization and scope out what the frontier methods are. This includes AdamW, Muon, and MoE. This information should directly inform what type of training we conduct for the final eduLLM.</p>
+    <p>Purpose: To understand the mechanisms of pre-training optimization and scope out what the frontier methods are. This includes AdamW, Muon, MoE. This information should directly inform what type of training we conduct for the final eduLLM.</p>
 
-    <h2>Out of scope</h2>
-    <p>Anything outside of pretraining optimization.</p>
+    <p>Out-of-scope: Anything outside of pre-training optimization.</p>
 
-    <h2>DOK4 — SPOVs</h2>
-    <p><strong>SPOV 1:</strong> The pretraining method should be heavily adapted to the type of learning the model needs to do. Since it will be absorbing knowledge from textbooks / curriculum-shaped data, we should not default to a generic web-crawl AdamW recipe without asking what geometry that data creates.</p>
-    <p><strong>SPOV 2:</strong> The loss function and frontier training method should heavily depend on the fact that we are training an eduLLM. Priority is a model that teaches students well under budget, not generic perplexity. Learning-science techniques (skill order, worked examples, QA form) belong in the pretraining conversation, not only in post-training or UX.</p>
-    <p class="tbd">SPOV 3 / 4 — draft later.</p>
-
-    <h2>DOK3 — Insights</h2>
-    <p class="tbd">Draft together. Starters from Distill + open slots:</p>
+    <h2>DOK4 SPOVs</h2>
     <ul>
-      <li>Training efficiency depends heavily on the loss landscape. There are ways to measure surface unevenness (e.g. condition number / eigenmodes) and ways to adjust for it (momentum, preconditioning, changing the problem).</li>
-      <li>If we consider weights and updates in the eigenbasis, the directions act independently under nice convex quadratic losses.</li>
-      <li>Introducing noise to gradient updates can act like a regularizer, but large momentum can also retain noise.</li>
-      <li class="tbd">[AdamW — insight TBD]</li>
-      <li class="tbd">[Muon — insight TBD]</li>
-      <li class="tbd">[MoE — insight TBD]</li>
+      <li>The pretraining method should be heavily adapted to the type of learning the model needs to do. Since it will be absorbing knowledge from textbooks, we should choose ____ training.</li>
+      <li>I also think that the loss function and frontier training method should heavily depend on the fact that we are training an eduLLM, and our priority will be creating a model that teaches students the best.</li>
+      <li>I also think we can use learning science techniques during pre-training.</li>
     </ul>
 
-    <h2>Sources</h2>
+    <h2>DOK3 Insights</h2>
+    <ul>
+      <li>Training efficiency depends heavily on the loss landscape, and there are various ways to measure surface unevenness as well as how to adjust for it.</li>
+      <li>Introducing noise to gradient updates is a way to avoid overfitting.</li>
+      <li>If we consider weights and updates in the eigenbasis, the directions act independently under nice, convex quadratic loss functions.</li>
+    </ul>
 
-    <div class="source">
-      <h3>Source 1 — Why Momentum Really Works (Distill)</h3>
-      <p><a href="https://distill.pub/2017/momentum/">distill.pub/2017/momentum</a> · <a href="notes.html">math notes</a><br />
-      <span class="status">Deep-read</span></p>
-      <p><strong>DOK1 — Facts</strong></p>
-      <ul>
-        <li>Pathological curvature: axes mismatched in curvature. Measured by $\kappa=\lambda_{\max}/\lambda_{\min}$.</li>
-        <li>On a convex quadratic, GD in the eigenbasis updates each mode independently: $x_i^{k+1}=(1-\alpha\lambda_i)x_i^k$.</li>
-        <li>Momentum uses a velocity state. Each mode becomes a 2D linear system. Optimal rate scales like $(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$.</li>
-        <li>First-order methods are linear combinations of past gradients. On Distill’s hard path, that implies a speed-of-light limit on information transfer.</li>
-        <li>As $n\to\infty$ on that path objective, $\kappa(f^n)$ approaches the design $\kappa$, and momentum’s upper bound meets the lower bound.</li>
-        <li>Escape hatch: reformulate to change $\kappa$ / geometry. Don’t only remix gradient coefficients.</li>
-      </ul>
-      <p><strong>DOK2 — Summary.</strong> Eigenbasis thinking makes GD/momentum clearer: modes decouple, $\kappa$ explains the pain, and momentum’s $\sqrt{\kappa}$ speedup is real but basically tight for linear first-order methods on that worst-case class. For eduLLM pretraining: cursed geometry will not be fixed by a cleverer first-order trick alone.</p>
-    </div>
+    <p><strong>Source 1: <a href="https://distill.pub/2017/momentum/">https://distill.pub/2017/momentum/</a></strong></p>
+    <p><strong>Github notes: <a href="notes.html">https://katiehehe.github.io/momentum-math-notes/notes.html</a></strong></p>
 
-    <div class="source">
-      <h3>Source 2 — AdamW</h3>
-      <p>Loshchilov &amp; Hutter, 2017. <a href="https://arxiv.org/abs/1711.05101">arXiv:1711.05101</a><br />
-      Related: Adam — <a href="https://arxiv.org/abs/1412.6980">arXiv:1412.6980</a><br />
-      <span class="status">To read / map · null baseline</span></p>
-      <p><strong>DOK1 — Facts</strong></p>
-      <ul>
-        <li class="tbd">(fill while reading)</li>
-        <li>Adam adapts stepsizes from first and second moments of gradients.</li>
-        <li>AdamW decouples weight decay from the adaptive gradient update.</li>
-        <li>AdamW is the default optimizer in most LLM pretraining recipes.</li>
-      </ul>
-      <p class="tbd"><strong>DOK2 — Summary.</strong> Draft together after reading.</p>
-    </div>
+    <h2>DOK1 Facts</h2>
+    <ul>
+      <li>pathological curvature - when the axes of the parameter space are mismatched in curvature
+        <ul>
+          <li>quadratic speedup → in a narrow &amp; technical sense, optimal (👀) according to Nesterov</li>
+        </ul>
+      </li>
+    </ul>
 
-    <div class="source">
-      <h3>Source 3 — Muon</h3>
-      <p>Liu et al., 2025. <a href="https://arxiv.org/abs/2502.16982">arXiv:2502.16982</a><br />
-      <span class="status">To read / map · frontier optimizer</span></p>
-      <p><strong>DOK1 — Facts</strong></p>
-      <ul>
-        <li class="tbd">(fill while reading)</li>
-        <li>Muon is an orthogonalized / spectral momentum-style optimizer aimed at LLM training efficiency.</li>
-        <li>Claimed compute-efficiency gains vs AdamW in the paper’s setting (prior until measured on our harness).</li>
-      </ul>
-      <p class="tbd"><strong>DOK2 — Summary.</strong> Draft together after reading.</p>
-    </div>
-
-    <div class="source">
-      <h3>Source 4 — MoE (Switch Transformers)</h3>
-      <p>Fedus, Zoph &amp; Shazeer, 2021. <a href="https://arxiv.org/abs/2101.03961">arXiv:2101.03961</a><br />
-      <span class="status">To read / map · pretraining scale / sparse compute</span></p>
-      <p><strong>DOK1 — Facts</strong></p>
-      <ul>
-        <li class="tbd">(fill while reading)</li>
-        <li>Mixture-of-Experts routes tokens to a subset of experts. Sparse activation ⇒ large parameter count without full dense FLOPs every step.</li>
-        <li>Rough compute intuition: dense ~$6PN$ vs MoE closer to activated-expert compute (routing/capacity dependent).</li>
-        <li>Relevant to pretraining because it changes the parameter–compute tradeoff, not only the optimizer.</li>
-      </ul>
-      <p class="tbd"><strong>DOK2 — Summary.</strong> Draft together after reading.</p>
-    </div>
-
-    <h2>Next</h2>
     <ol>
-      <li>Keep SPOVs 1–2. Draft SPOV 3+ after AdamW / Muon / MoE notes exist.</li>
-      <li>Fill DOK1 per source, then write DOK3 insights that combine them.</li>
-      <li>Decide what training choice “____” means concretely (optimizer vs MoE vs data geometry).</li>
+      <li>
+        <p>Simple Example: GD on the convex quadratic</p>
+        <ul>
+          <li>the update acts on each eigendirection independently</li>
+          <li>derivation of independently-scaled eigenerrors (the $x_i$)
+            $$
+            \begin{aligned}
+            \text{update: } w_{k+1}&=w_k-\alpha(Aw_k-b)\\[0.5em]
+            \text{optimal solution: } Aw^\star&=b\\[0.5em]
+            \text{rearranging: } w_{k+1}-w^\star&=(I-\alpha A)(w_k-w^\star)\\[0.5em]
+            \text{defining error from optimal: }e_k&=w_k-w^\star,\qquad e_{k+1}=(I-\alpha A)e_k\\[0.5em]
+            \text{change of base: } x_k&=Q^{\top} e_k=Q^{\top}(w_k-w^\star),\qquad e_k=Qx_k\\[0.5em]
+            \text{decomposition: } A&=Q\Lambda Q^{\top},\qquad AQ=Q\Lambda,\qquad \Lambda=\mathrm{diag}(\lambda_1,\ldots,\lambda_n)\\[0.5em]
+            \text{substitution: } x_{k+1}&=(I-\alpha\Lambda)x_k\\[0.5em]
+            \text{diag matrix: }I-\alpha\Lambda&=\mathrm{diag}(1-\alpha\lambda_1,\;\ldots,\;1-\alpha\lambda_n)\\[0.5em]
+            \text{recursive update: } x_i^{k+1}&=(1-\alpha\lambda_i)\,x_i^k\\[0.5em]
+            \text{closed form: } x_i^k&=(1-\alpha\lambda_i)^k\,x_i^0
+            \end{aligned}
+            $$
+          </li>
+          <li>can measure loss</li>
+        </ul>
+        <img src="pre-training-brainlift/image.png" alt="function error convex at w star" />
+        <p class="caption">the function error is also convex and minimized at w = w*</p>
+        <img src="pre-training-brainlift/image-1.png" alt="condition number" />
+        <p class="caption">determines the rate of convergence, is a direct measure of pathological curvature</p>
+        <img src="pre-training-brainlift/image-2.png" alt="excess loss split" />
+        <p class="caption">change bases for error → realize that the loss is the sum of losses over each eigendirection, squared by the eigenerrors</p>
+        <img src="pre-training-brainlift/image-3.png" alt="optimal alpha" />
+        <p class="caption">derived from setting the rates of convergence equal for each eigenvector</p>
+      </li>
+      <li>
+        <p>Another example: polynomial regression</p>
+        <ul>
+          <li>we can transform the weights to be expressed in the eigenbasis</li>
+        </ul>
+        <img src="pre-training-brainlift/image-4.png" alt="eigenbasis projection" />
+        <p class="caption">each new p is the projection of the old p’s into the eigenbasis (to change coordinates)</p>
+        <img src="pre-training-brainlift/IMG_FC224B88CD1C-1.jpeg" alt="Zw = ZQ QTw" />
+        <p class="caption">we can write Zw = (ZQ)·(Q^Tw)</p>
+        <ul>
+          <li>now the behavior of the $x_i$'s is more understandable than the $w_i$'s because each coordinate behaves independently of another</li>
+          <li>for ZQ, each column represents the impression that an eigenvector has on all the data (each row is a different data point)</li>
+          <li>$Q^\top w$ represents the new weights we want to optimize, and they represent how important each eigendirection is to capture the pattern in the data</li>
+          <li>can use early stopping to achieve the same effects as ridge (Tikhonov) regression—with regular SGD, the stopping doesn’t allow the smaller eigendirections to overfit to the data</li>
+        </ul>
+        <img src="pre-training-brainlift/image-5.png" alt="early stopping vs ridge" />
+      </li>
+      <li>
+        <p>Switching to momentum</p>
+        <img src="pre-training-brainlift/image-6.png" alt="momentum update" />
+        <ul>
+          <li>the convergence rate is determined by the larger eigenvalue (in absolute value)</li>
+          <li>under certain conditions, the eigenvalues are complex and the convergence rate is independent of alpha and eigenvalues—it only depends on beta</li>
+        </ul>
+      </li>
+      <li>
+        <p>The Critical Damping Coefficient</p>
+        <img src="pre-training-brainlift/image-7.png" alt="phase diagram spring" />
+        <p class="caption">phase diagram approximately representing the movement of a spring</p>
+        <ul>
+          <li>there’s both a component that maintains velocity (beta) and provides a restoring force (gradient)</li>
+        </ul>
+        <img src="pre-training-brainlift/image-8.png" alt="critical damping" />
+        <ul>
+          <li>for multiple modes, we only have to look at the 2x2 matrices with the largest &amp; smallest eigenvalues</li>
+        </ul>
+        <img src="pre-training-brainlift/image-9.png" alt="two extremal matrices" />
+        <p class="caption">there are many matrices, but we only need to look at 2 of them</p>
+        <ul>
+          <li>there will be repeated roots in those quadratics and between those quadratics</li>
+        </ul>
+        <img src="pre-training-brainlift/image-10.png" alt="solve alpha beta" />
+        <p class="caption">the equation holds for alpha, beta, and the 2 different lamdas → we can solve for alpha and beta</p>
+        <img src="pre-training-brainlift/image-11.png" alt="decrease condition number" />
+        <p class="caption">decreasing the condition number is good!</p>
+        <ul>
+          <li>for ill-conditioned problems, beta will be close to 1 → we initialize it as a high number
+            <ul>
+              <li>then, we find the largest $\alpha$ that allows for convergence</li>
+            </ul>
+          </li>
+          <li>even tho we might find the optimal $\alpha$ and $\beta$, this only guarantees best long-term convergence rate, not ideal short-term behavior</li>
+        </ul>
+      </li>
     </ol>
+
+    <ul>
+      <li>Example: The Colorization Problem
+        <ul>
+          <li>without momentum, all the updates are localized &amp; act like drops of ink in water</li>
+          <li>can rewrite the optimization problem with matrices &amp; vectors</li>
+          <li>Laplacian matrix $L_G$ connects lin alg &amp; graph theory
+            <ul>
+              <li>conditioning of $L_G$ ↔ connectivity of the graph
+                <ul>
+                  <li>poor connectivity (like linear graphs) → 1st order optimizations can’t overcome speed hurdles (👀)</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>The Limits of Descent
+        <ul>
+          <li>both gradient descent and momentum can be “unrolled”</li>
+        </ul>
+        <img src="pre-training-brainlift/image-12.png" alt="unrolling momentum" />
+        <p class="caption">unrolling momentum. past gradients have a lingering effect</p>
+        <ul>
+          <li>all manner of first order algorithms, including the Conjugate Gradient algorithm, AdaMax, Averaged Gradient and more, can be written (though not quite so neatly) in this unrolled form</li>
+        </ul>
+        <img src="pre-training-brainlift/image-13.png" alt="general first order form" />
+        <p class="caption">general form</p>
+        <ul>
+          <li>when allowing for different step sizes for different directions</li>
+        </ul>
+        <img src="pre-training-brainlift/image-14.png" alt="covers ADAM and AdaGrad" />
+        <p class="caption">covers ADAM and AdaGrad</p>
+        <ul>
+          <li>Convex Rosenbrock</li>
+        </ul>
+        <img src="pre-training-brainlift/image-15.png" alt="convex rosenbrock" />
+        <p class="caption">as n → $\infty$, the condition number → $\kappa$</p>
+        <ul>
+          <li>unfortunately this construction makes the lower bound of error asymptotically equal to the upper bound guaranteed by momentum → shows optimality</li>
+        </ul>
+      </li>
+      <li>Momentum with Stochastic Gradients
+        <ul>
+          <li>finding gradients is difficult → momentum includes an error term with EV = 0</li>
+          <li>updates are noisy</li>
+        </ul>
+        <img src="pre-training-brainlift/image-16.png" alt="noisy momentum" />
+        <ul>
+          <li>according to “On the importance of initialization and momentum in deep learning,” the transient phase seems to matter more than the fine-tuning phase in machine learning</li>
+          <li>noise acts as an implicit regularizer</li>
+        </ul>
+      </li>
+      <li>future directions: envisioning momentum as a discrete differential equation, approximating polynomials, geometry, ellipsoid method, duality, second-order methods</li>
+    </ul>
+
+    <p>DOK2 Summary: When doing GD, it is easier to think of the gradient in the eigenbasis because each coordinate is independent of the others. We can express the weights in the eigenbasis and transform the features to match the new representation. In momentum, transforming into the eigenbasis gives us a closed-form formula for finding the updates and weights at every step. Using the constraint of keeping the eigenvalues less than 1, we can guarantee convergence for larger learning rates. Choosing the optimal alpha and beta requires difficult optimization, so the rates are often found empirically. Finally, all momentum techniques can be parameterized into a few equations, and using stochastic momentum introduces noise into the updates but can boost robustness.</p>
+
+    <p><strong>Source 2: <a href="https://arxiv.org/abs/1711.05101">https://arxiv.org/abs/1711.05101</a></strong> (AdamW — Loshchilov &amp; Hutter)</p>
+    <p>Related: Adam <a href="https://arxiv.org/abs/1412.6980">https://arxiv.org/abs/1412.6980</a></p>
+    <h2>DOK1 Facts</h2>
+    <ul>
+      <li><em>(to fill)</em></li>
+      <li>Adam adapts per-parameter steps using running averages of the gradient and squared gradient</li>
+      <li>AdamW decouples weight decay from the adaptive update (unlike L2 regularization inside Adam)</li>
+      <li>AdamW is the usual default for LLM pretraining</li>
+    </ul>
+    <p>DOK2 Summary: <em>(draft together)</em></p>
+
+    <p><strong>Source 3: <a href="https://arxiv.org/abs/2502.16982">https://arxiv.org/abs/2502.16982</a></strong> (Muon — Liu et al.)</p>
+    <h2>DOK1 Facts</h2>
+    <ul>
+      <li><em>(to fill)</em></li>
+      <li>Muon = orthogonalized / spectral momentum-style optimizer for LLM training</li>
+      <li>paper claims large compute-efficiency gains vs AdamW (prior until we measure on our harness)</li>
+    </ul>
+    <p>DOK2 Summary: <em>(draft together)</em></p>
+
+    <p><strong>Source 4: <a href="https://arxiv.org/abs/2101.03961">https://arxiv.org/abs/2101.03961</a></strong> (MoE — Switch Transformers, Fedus et al.)</p>
+    <h2>DOK1 Facts</h2>
+    <ul>
+      <li><em>(to fill)</em></li>
+      <li>Mixture-of-Experts routes each token to a subset of experts (sparse activation)</li>
+      <li>can grow total parameters a lot while keeping per-token compute closer to activated experts only</li>
+      <li>relevant to pretraining scale / FLOPs tradeoff, not just “pick an optimizer”</li>
+    </ul>
+    <p>DOK2 Summary: <em>(draft together)</em></p>
   </article>
 </body>
 </html>

@@ -1,22 +1,8 @@
-# Geometry Before Stepsize
+# pre-training brainlift
 
-Pretraining-optimization brainlift for Incept’s eduLLM (κ-first pretraining), with Distill math notes as an appendix.
-
-## Live site
+Notion-style brainlift page + Distill math notes appendix.
 
 **https://katiehehe.github.io/momentum-math-notes/**
 
-| Page | URL |
-|------|-----|
-| Brainlift (main) | https://katiehehe.github.io/momentum-math-notes/ |
-| Distill math notes (appendix) | https://katiehehe.github.io/momentum-math-notes/notes.html |
-
-Repo: https://github.com/katiehehe/momentum-math-notes
-
-## Local preview
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000`.
+- Brainlift (main): `/`
+- Math notes appendix: `/notes.html`
