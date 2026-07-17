@@ -8,11 +8,6 @@ Clickable KaTeX notes walking through [Why Momentum Really Works](https://distil
 
 Repo: https://github.com/katiehehe/momentum-math-notes
 
-## Pages
-
-- [`index.html`](index.html) — main Distill / momentum notes
-- [`fisher-hessian-notes.html`](fisher-hessian-notes.html) — Fisher vs Hessian side notes
-
 ## Local preview
 
 Open `index.html` in a browser, or from this folder:
