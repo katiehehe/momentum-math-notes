@@ -1,8 +1,9 @@
-# pre-training brainlift
+# Why Momentum Works — Math Notes
 
-Notion-style brainlift page + Distill math notes appendix.
+Clickable KaTeX notes walking through [Why Momentum Really Works](https://distill.pub/2017/momentum/).
 
-**https://katiehehe.github.io/momentum-math-notes/**
+**Live:** https://katiehehe.github.io/momentum-math-notes/
 
-- Brainlift (main): `/`
-- Math notes appendix: `/notes.html`
+```bash
+python3 -m http.server 8000
+```
