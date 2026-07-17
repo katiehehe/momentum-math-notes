@@ -6,6 +6,9 @@ Clickable KaTeX notes walking through [Why Momentum Really Works](https://distil
 
 **https://katiehehe.github.io/momentum-math-notes/**
 
+- Math notes (Distill walkthrough): `/`
+- Brainlift thesis: [`/brainlift.html`](https://katiehehe.github.io/momentum-math-notes/brainlift.html)
+
 Repo: https://github.com/katiehehe/momentum-math-notes
 
 ## Local preview
